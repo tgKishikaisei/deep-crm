@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+
+    <h1 class="mb-5 text-center fw-bold text-white" style="letter-spacing: 1px;">
+            Дашборд,
+            <span style="color: #00d2ff; text-shadow: 0 0 20px rgba(0, 210, 255, 0.6);">
+                {{ user.first_name|default:user.username }}
+            </span>
+    </h1>
+
+    <!-- Ряд с карточками статистики -->
+    <div class="row">
+        <!-- Карточка Активные сделки -->
+        <div class="col-md-4 mb-4"  data-aos="fade-up" data-aos-delay="100">
+            <div class="card text-white bg-primary shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Активные сделки</h5>
+                    <p class="card-text display-4">{{ active_deals_count }}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'crm:deal_list' %}" class="text-white">Посмотреть все &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка Сумма в работе -->
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card text-white bg-success shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Сумма в работе</h5>
+                    <p class="card-text display-4">{{ active_deals_total_amount|floatformat:0 }} ₽</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'crm:deal_list' %}" class="text-white">Посмотреть все &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+          <!-- Карточка Новые клиенты -->
+        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="card text-white bg-info shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Новые клиенты (30 дней)</h5>
+                    <p class="card-text display-4">{{ new_clients_count }}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'crm:client_list' %}" class="text-white">Посмотреть все &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-5 mb-4" data-aos="zoom-in">
+            <div class="card h-100 shadow-sm" style="background: rgba(20, 30, 48, 0.6); backdrop-filter: blur(10px);">
+                <div class="card-body">
+                    <h5 class="card-title mb-4" style="color: #00d2ff;">📊 Воронка продаж</h5>
+                    <!-- Сюда ApexCharts нарисует график -->
+                    <div id="stagesChart" style="min-height:300px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7 mb-4" data-aos="zoom-in" data-aos-delay="200">
+            <div class="card h-100 shadow-sm" style="background: rgba(20, 30, 48, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+                <div class="card body">
+                    <h5 class="card-title mb-4" style="color: #2ecc71;">📈 Динамика сумм сделок</h5>
+                    <div id="amountsChart" style="min-height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-12" data-aos="fade-up">
+                <div class="card shadow-sm" style="background: rgba(20, 30, 48, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="card-header border-0" style="background: transparent; border-bottom: 1px solid rgba(255,255,255,0.1) !important;">
+                        <h4 class="mb-0 fw-bold" style="color: #00d2ff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);">
+                        Последние 5 добавленных сделок
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        {% if latest_deals %}
+                            <ul class="list-group list-group-flush">
+                                {% for deal in latest_deals %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <a href="{% url 'crm:deal_detail' deal.pk %}" class="fw-bold text-decoration-none" style="color: #00d2ff; font-size: 1.1rem;">
+                                                {{ deal.title }}
+                                            </a>
+                                            <small class="d-block text-white-50 mt-1">{{ deal.client.company_name }}</small>
+                                            <span class="float-end">
+                                            </span>
+                                        </div>
+                                        <span class="fw-bold" style="color: #2ecc71; font-size: 1.1rem;">
+                                            {{ deal.amount|floatformat:0 }} sum
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted"> У вас пока нет сделок</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- Подключаем библиотеку ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+// --- 1. Настройка Круговой диаграммы (Donut) ---
+    var optionsStages = {
+        series: {{ chart_stages_data|safe }},
+        chart: {
+            type: 'donut',
+            height: 300,
+            background: 'transparent', // 1. Прозрачный фон самого графика
+            foreColor: '#ffffff'       // 2. Весь текст (легенда) автоматически станет белым
+        },
+        labels: ['Новые', 'В работе', 'Успешно', 'Провал'],
+        colors: ['#0d6efd', '#ffc107', '#198754', '#6c757d'],
+
+        // 3. Убираем рамки (границы) между кусочками
+        stroke: {
+            show: false, // Можно поставить true, но тогда colors: ['transparent']
+            width: 0
+        },
+
+        // 4. Настройка легенды (справа)
+        legend: {
+            position: 'right',
+            offsetY: 0,
+            height: 230,
+            labels: {
+                colors: '#ffffff', // Принудительно белый цвет текста
+                useSeriesColors: false
+            },
+            markers: {
+                width: 10,
+                height: 10,
+                radius: 12, // Круглые маркеры
+            },
+            itemMargin: {
+                horizontal: 10,
+                vertical: 5
+            }
+        },
+
+        // 5. Настройка дырки от бублика
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '70%', // Размер дырки
+                    labels: {
+                        show: true,
+                        name: {
+                            show: true,
+                            color: '#ffffff'
+                        },
+                        value: {
+                            show: true,
+                            color: '#ffffff',
+                            fontWeight: 'bold'
+                        },
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            label: 'Всего',
+                            color: '#ffffff', // Цвет слова "Всего"
+                            fontWeight: 600
+                        }
+                    }
+                }
+            }
+        },
+
+        // Отключаем лишние подписи на самом графике для чистоты
+        dataLabels: {
+            enabled: false
+        },
+
+        // Темная тема (на всякий случай)
+        theme: {
+            mode: 'dark',
+            palette: 'palette1'
+        }
+    };
+
+    var chart1 = new ApexCharts(document.querySelector("#stagesChart"), optionsStages);
+    chart1.render();
+
+
+    // --- 2. Настройка Графика области (Area) ---
+    var optionsAmounts = {
+        series: [{
+            name: 'Сумма сделки',
+            data: {{ chart_amounts|safe }} // Данные сумм
+        }],
+        chart: {
+            type: 'area', // Красивый график с заливкой
+            height: 300,
+            background: 'transparent',
+            toolbar: { show: false }
+        },
+        colors: ['#00d2ff'], // Неоновый голубой
+        theme: { mode: 'dark' },
+        stroke: { curve: 'smooth' }, // Плавные линии
+        xaxis: {
+            categories: {{ chart_titles|safe }}, // Названия сделок
+            labels: { style: { colors: '#aaa' } }
+        },
+        yaxis: {
+            labels: { style: { colors: '#aaa' } }
+        },
+        grid: {
+            borderColor: '#333', // Темная сетка
+        },
+        dataLabels: { enabled: false },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.1, // Градиент уходит в прозрачность
+            }
+        }
+    };
+
+    var chart2 = new ApexCharts(document.querySelector("#amountsChart"), optionsAmounts);
+    chart2.render();
+</script>
+
+{% endblock %}

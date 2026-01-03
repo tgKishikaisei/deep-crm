@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Календарь событий{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4" style="margin-top: 3vh;">
+    
+    <!-- Заголовок -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="fw-bold text-white mb-0" style="text-shadow: 0 0 20px rgba(0,210,255,0.5);">
+            Календарь миссий
+        </h1>
+        <span class="badge bg-dark border border-info text-info p-2">
+            <i class="fa-regular fa-clock me-1"></i> Планировщик
+        </span>
+    </div>
+
+    <!-- Стеклянная панель календаря -->
+    <div class="card glass-panel border-0 shadow-lg animate-fade-in">
+        <div class="card-body p-4">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Подключаем FullCalendar -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ru', // Русский язык
+            themeSystem: 'bootstrap5',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            buttonText: {
+                today: 'Сегодня',
+                month: 'Месяц',
+                week: 'Неделя',
+                list: 'Список'
+            },
+            events: '{% url "crm:calendar_events" %}', // Откуда брать данные (наш API)
+            eventClick: function(info) {
+                // Если есть URL, открываем его (например, переход к сделке)
+                if (info.event.url) {
+                    info.jsEvent.preventDefault(); // отмена стандартного перехода
+                    window.open(info.event.url, "_self"); // открытие в том же окне
+                }
+            },
+            eventDidMount: function(info) {
+                // Добавляем тултип (подсказку) при наведении
+                info.el.title = info.event.title;
+            }
+        });
+        
+        calendar.render();
+    });
+</script>
+
+<style>
+    /* --- СТИЛИЗАЦИЯ КАЛЕНДАРЯ ПОД КОСМОС --- */
+    
+    /* Убираем белый фон и границы */
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Заголовки дней */
+    .fc-col-header-cell-cushion {
+        color: #00d2ff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    /* Цифры дат */
+    .fc-daygrid-day-number {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+    }
+    
+    /* Кнопки календаря */
+    .fc-button-primary {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+    }
+    .fc-button-primary:hover, .fc-button-active {
+        background-color: #00d2ff !important;
+        border-color: #00d2ff !important;
+        color: black !important;
+    }
+    
+    /* Заголовок месяца */
+    .fc-toolbar-title {
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    
+    /* События (Стеклянные плашки) */
+    .fc-event {
+        border: none !important;
+        border-radius: 4px;
+        padding: 2px 5px;
+        font-size: 0.85em;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    
+    .fc-event:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px currentColor; /* Свечение цветом события */
+        z-index: 10;
+    }
+    
+    /* Текущий день */
+    .fc-day-today {
+        background: rgba(0, 210, 255, 0.05) !important;
+    }
+</style>
+{% endblock %}

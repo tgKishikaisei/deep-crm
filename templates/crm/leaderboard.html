@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Зал Славы{% endblock %}
+
+{% block content %}
+<div class="container animate-fade-in" style="margin-top: 5vh;">
+    
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-white display-4" style="text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);">
+            🏆 Зал Славы
+        </h1>
+        <p class="text-white-50">Лучшие менеджеры галактики</p>
+    </div>
+
+    <!-- ТОП-3 (Пьедестал) -->
+    <div class="row justify-content-center align-items-end mb-5">
+        
+        {% for leader in top_leaders %}
+            <!-- Определяем стили для 1, 2, 3 места -->
+            {% if forloop.counter == 1 %}
+                <!-- 1 МЕСТО (ЗОЛОТО) - ПО ЦЕНТРУ -->
+                <div class="col-md-4 order-md-2 mb-4">
+                    <div class="winner-card gold-card text-center p-4 position-relative">
+                        <div class="crown">👑</div>
+                        <div class="avatar-large mx-auto mb-3 border-gold">
+                            {{ leader.username|slice:":1"|upper }}
+                        </div>
+                        <h2 class="fw-bold text-white mb-0">{{ leader.username }}</h2>
+                        <div class="badge bg-warning text-dark mt-2 mb-3">TOP 1</div>
+                        <h3 class="fw-bold text-warning counter" data-target="{{ leader.total_sales|default:0 }}">0</h3>
+                        <small class="text-white-50">сумма продаж</small>
+                    </div>
+                </div>
+            {% elif forloop.counter == 2 %}
+                <!-- 2 МЕСТО (СЕРЕБРО) - СЛЕВА -->
+                <div class="col-md-4 order-md-1 mb-4">
+                    <div class="winner-card silver-card text-center p-3">
+                        <div class="avatar-medium mx-auto mb-3 border-silver">
+                            {{ leader.username|slice:":1"|upper }}
+                        </div>
+                        <h4 class="fw-bold text-white mb-0">{{ leader.username }}</h4>
+                        <div class="badge bg-secondary text-white mt-2 mb-3">TOP 2</div>
+                        <h4 class="fw-bold text-light counter" data-target="{{ leader.total_sales|default:0 }}">0</h4>
+                    </div>
+                </div>
+            {% elif forloop.counter == 3 %}
+                <!-- 3 МЕСТО (БРОНЗА) - СПРАВА -->
+                <div class="col-md-4 order-md-3 mb-4">
+                    <div class="winner-card bronze-card text-center p-3">
+                        <div class="avatar-medium mx-auto mb-3 border-bronze">
+                            {{ leader.username|slice:":1"|upper }}
+                        </div>
+                        <h4 class="fw-bold text-white mb-0">{{ leader.username }}</h4>
+                        <div class="badge mt-2 mb-3" style="background: #cd7f32;">TOP 3</div>
+                        <h4 class="fw-bold text-light counter" data-target="{{ leader.total_sales|default:0 }}">0</h4>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+    </div>
+
+    <!-- ОСТАЛЬНЫЕ УЧАСТНИКИ (Список) -->
+    {% if other_leaders %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card glass-panel border-0">
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for leader in other_leaders %}
+                            <div class="list-group-item bg-transparent text-white border-secondary d-flex align-items-center px-4 py-3">
+                                <span class="fs-4 fw-bold text-white-50 me-3">#{{ forloop.counter|add:3 }}</span>
+                                <div class="manager-avatar-small me-3">
+                                    {{ leader.username|slice:":1"|upper }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-0">{{ leader.username }}</h5>
+                                </div>
+                                <div class="fw-bold text-info">
+                                    {{ leader.total_sales|default:0|floatformat:0 }} ₽
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    /* --- СТИЛИ ПЬЕДЕСТАЛА --- */
+    
+    .winner-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .winner-card:hover { transform: translateY(-10px); }
+
+    /* ЗОЛОТО */
+    .gold-card {
+        border-color: #ffd700;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        height: 100%;
+        transform: scale(1.05); /* Чуть больше остальных */
+        z-index: 2;
+    }
+    .border-gold { border: 4px solid #ffd700; box-shadow: 0 0 15px #ffd700; }
+    .crown { font-size: 3rem; position: absolute; top: -30px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; }
+
+    /* СЕРЕБРО */
+    .silver-card { border-color: #c0c0c0; box-shadow: 0 0 20px rgba(192, 192, 192, 0.2); margin-top: 20px; }
+    .border-silver { border: 3px solid #c0c0c0; }
+
+    /* БРОНЗА */
+    .bronze-card { border-color: #cd7f32; box-shadow: 0 0 20px rgba(205, 127, 50, 0.2); margin-top: 40px; }
+    .border-bronze { border: 3px solid #cd7f32; }
+
+    /* АВАТАРКИ */
+    .avatar-large {
+        width: 100px; height: 100px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem; font-weight: bold; background: rgba(255,255,255,0.1); color: white;
+    }
+    .avatar-medium {
+        width: 80px; height: 80px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2rem; font-weight: bold; background: rgba(255,255,255,0.1); color: white;
+    }
+    .manager-avatar-small {
+        width: 40px; height: 40px; border-radius: 50%; background: #00d2ff;
+        display: flex; align-items: center; justify-content: center; font-weight: bold;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-10px); }
+    }
+</style>
+
+<!-- Скрипт для накрутки цифр -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const counters = document.querySelectorAll('.counter');
+        
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target').replace(',', '.'); // Берем число
+            const duration = 2000; // Длительность 2 сек
+            const increment = target / (duration / 20); // Шаг
+            
+            let current = 0;
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    counter.innerText = Math.ceil(current).toLocaleString() + ' ₽';
+                    setTimeout(updateCounter, 20);
+                } else {
+                    counter.innerText = Math.ceil(target).toLocaleString() + ' ₽';
+                }
+            };
+            updateCounter();
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Редактирование задачи{% else %}Новая задача{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
+        <div class="col-md-6">
+            
+            <div class="card glass-panel border-0 shadow-lg animate-fade-in">
+                <div class="card-body p-5">
+                    
+                    <h2 class="text-center mb-4 fw-bold text-white">
+                        {% if form.instance.pk %}
+                            <i class="fa-solid fa-pen-to-square text-warning me-2"></i> Изменить задачу
+                        {% else %}
+                            <i class="fa-solid fa-list-check text-info me-2"></i> Новая задача
+                        {% endif %}
+                    </h2>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Название -->
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">Что нужно сделать?</label>
+                            {% render_field form.title class="form-control" placeholder="Например: Позвонить клиенту" %}
+                        </div>
+
+                        <!-- Описание -->
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">Детали</label>
+                            {% render_field form.description class="form-control" rows="3" placeholder="Подробности..." %}
+                        </div>
+
+                        <div class="row">
+                            <!-- Дата и Время -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label text-white-50 small text-uppercase fw-bold">Дедлайн</label>
+                                <!-- type="datetime-local" включает календарь -->
+                                {% render_field form.due_date class="form-control" type="datetime-local" %}
+                            </div>
+
+                            <!-- Статус -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label text-white-50 small text-uppercase fw-bold">Статус</label>
+                                {% render_field form.status class="form-select" %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-neon">
+                                <i class="fa-solid fa-check me-2"></i> Сохранить
+                            </button>
+                            <!-- Кнопка назад (хитрая: возвращает на предыдущую страницу) -->
+                            <button type="button" onclick="history.back()" class="btn btn-outline-light">
+                                Отмена
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

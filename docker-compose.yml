@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 1. Наш сайт (Django)
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app  # Связь папки на компе с папкой в контейнере (чтобы код обновлялся)
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+
+  # 2. База данных (PostgreSQL)
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=crm_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=testpass123
+
+  # 3. Брокер (Redis)
+  redis:
+    image: redis:alpine
+
+  # 4. Воркер (Celery) - для фоновых задач
+  celery:
+    build: .
+    # ВНИМАНИЕ: Внутри Docker мы на Linux, поэтому eventlet НЕ НУЖЕН!
+    command: celery -A crm_project worker -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+      - redis
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+
+volumes:
+  postgres_data:

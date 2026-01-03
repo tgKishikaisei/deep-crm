@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Потеряны в космосе{% endblock %}
+
+{% block content %}
+<div class="container h-100 d-flex justify-content-center align-items-center text-center" style="min-height: 80vh;">
+    <div>
+        <h1 style="font-size: 8rem; font-weight: bold; color: #00d2ff; text-shadow: 0 0 30px rgba(0, 210, 255, 0.5);">404</h1>
+        <h2 class="text-white mb-4">Хьюстон, у нас проблема!</h2>
+        <p class="lead text-white-50 mb-5">Страница, которую вы ищете, улетела в другую галактику.</p>
+        
+        <a href="{% url 'crm:home' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+            <i class="fa-solid fa-shuttle-space me-2"></i> Вернуться на базу
+        </a>
+    </div>
+</div>
+{% endblock %}

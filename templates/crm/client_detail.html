@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Клиент: {{ client.company_name }}{% endblock %}
+
+{% block content %}
+<div class="container animate-fade-in" style="margin-top: 5vh;">
+
+    <!-- Кнопка "Назад" -->
+    <a href="{% url 'crm:client_list' %}" class="btn btn-link text-white-50 text-decoration-none mb-3 ps-0 hover-neon">
+        <i class="fa-solid fa-arrow-left me-2"></i> К списку клиентов
+    </a>
+
+    <div class="row">
+
+        <!-- ЛЕВАЯ КОЛОНКА: Профиль клиента -->
+        <div class="col-lg-4 mb-4">
+            <div class="card glass-panel border-0 shadow-lg h-100">
+                <div class="card-body p-4 text-center">
+
+                    <!-- Аватарка компании (Генерируется из первой буквы) -->
+                    <div class="mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle shadow-lg"
+                         style="width: 100px; height: 100px; background: linear-gradient(135deg, #00d2ff, #3a7bd5); font-size: 3rem; font-weight: bold; color: white;">
+                        {{ client.company_name|slice:":1"|upper }}
+                    </div>
+
+                    <h2 class="fw-bold text-white mb-1">{{ client.company_name }}</h2>
+                    <p class="text-info mb-4"><i class="fa-solid fa-id-badge me-2"></i>{{ client.contact_person }}</p>
+
+                    <!-- Кнопки действий -->
+                    <div class="d-flex justify-content-center gap-2 mb-4">
+                        <a href="{% url 'crm:client_update' client.pk %}" class="btn btn-outline-warning w-100">
+                            <i class="fa-solid fa-pen me-2"></i> Изменить
+                        </a>
+                        {% if user.role == 'ADMIN' %}
+                            <a href="{% url 'crm:client_delete' client.pk %}" class="btn btn-outline-danger w-100">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <hr class="border-secondary opacity-50">
+
+                    <!-- Контакты -->
+                    <div class="text-start mt-4">
+                        <div class="mb-3">
+                            <label class="text-white-50 small text-uppercase fw-bold mb-1">Email</label>
+                            <a href="mailto:{{ client.email }}" class="d-block text-white text-decoration-none fs-5 hover-link">
+                                <i class="fa-regular fa-envelope me-2 text-primary"></i> {{ client.email }}
+                            </a>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-white-50 small text-uppercase fw-bold mb-1">Телефон</label>
+                            <a href="tel:{{ client.phone }}" class="d-block text-white text-decoration-none fs-5 hover-link">
+                                <i class="fa-solid fa-phone me-2 text-success"></i> {{ client.phone }}
+                            </a>
+                        </div>
+                        <div class="mt-4 pt-3 border-top border-secondary">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <small class="text-white-50 d-block">Менеджер</small>
+                                    <span class="text-white">{{ client.manager.username|default:"Не назначен" }}</span>
+                                </div>
+                                <div>
+                                    <small class="text-white-50 d-block">Добавлен</small>
+                                    <span class="text-white">{{ client.created_at|date:"d.m.Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА: Сделки -->
+        <div class="col-lg-8">
+            <div class="card glass-panel border-0 shadow-lg h-100">
+                <div class="card-header bg-transparent border-bottom border-secondary p-4 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold text-white">
+                        <i class="fa-solid fa-briefcase me-2 text-info"></i> История сделок
+                    </h4>
+                    <!-- Кнопка "Создать сделку" для этого клиента (можно реализовать позже) -->
+                    <span class="badge bg-dark border border-secondary text-white-50">{{ client.deals.count }} всего</span>
+                </div>
+
+                <div class="card-body p-0">
+                    {% if client.deals.all %}
+                        <div class="list-group list-group-flush">
+                            {% for deal in client.deals.all %}
+                                <div class="list-group-item bg-transparent border-secondary hover-bg-light px-4 py-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+
+                                        <!-- Название и Дата -->
+                                        <div>
+                                            <a href="{% url 'crm:deal_detail' deal.pk %}" class="fs-5 fw-bold text-info text-decoration-none">
+                                                {{ deal.title }}
+                                            </a>
+                                            <div class="small text-white-50 mt-1">
+                                                <i class="fa-regular fa-calendar me-1"></i> {{ deal.created_at|date:"d E Y" }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Статус и Сумма -->
+                                        <div class="text-end">
+                                            <div class="fs-5 fw-bold text-success mb-1">{{ deal.amount|floatformat:0 }} ₽</div>
+
+                                            {% if deal.stage == 'NEW' %}
+                                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary">Новая</span>
+                                            {% elif deal.stage == 'IN_PROGRESS' %}
+                                                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning">В работе</span>
+                                            {% elif deal.stage == 'WON' %}
+                                                <span class="badge bg-success bg-opacity-25 text-success border border-success">Успех</span>
+                                            {% else %}
+                                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">Провал</span>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-white-50">
+                            <i class="fa-solid fa-folder-open fa-3x mb-3 opacity-50"></i>
+                            <p class="fs-5">Сделок пока нет</p>
+                            <p class="small">Но вы всегда можете создать новую!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Локальные стили */
+    .hover-neon:hover {
+        color: #00d2ff !important;
+        text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+    }
+
+    .hover-link:hover {
+        color: #00d2ff !important;
+        text-shadow: 0 0 5px rgba(0, 210, 255, 0.3);
+    }
+
+    /* Эффект наведения на сделку в списке */
+    .hover-bg-light:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Анимация появления */
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

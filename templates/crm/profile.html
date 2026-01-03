@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль - Deep CRM{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 5vh;">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            
+            <!-- Карточка профиля -->
+            <div class="card glass-panel text-center p-5 position-relative">
+                
+                <!-- Аватарка (Инициалы) -->
+                <div class="mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle shadow-lg" 
+                     style="width: 120px; height: 120px; background: linear-gradient(45deg, #00d2ff, #3a7bd5); font-size: 3rem; font-weight: bold;">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+
+                <h2 class="fw-bold text-white">{{ user.username }}</h2>
+                <span class="badge bg-primary rounded-pill mb-4 fs-6">{{ user.get_role_display }}</span>
+
+                <div class="row text-start mt-4">
+                    <div class="col-12 border-bottom border-secondary pb-2 mb-3">
+                        <small class="text-muted d-block">Email</small>
+                        <span class="fs-5">{{ user.email|default:"Не указан" }}</span>
+                    </div>
+                    <div class="col-12 border-bottom border-secondary pb-2 mb-3">
+                        <small class="text-muted d-block">Дата регистрации</small>
+                        <span class="fs-5">{{ user.date_joined|date:"d E Y" }}</span>
+                    </div>
+                    <div class="col-12">
+                         <small class="text-muted d-block">Статус</small>
+                         <span class="text-success"><i class="fa-solid fa-circle me-1"></i> Активен</span>
+                    </div>
+                </div>
+
+                <div class="mt-5">
+                    <a href="{% url 'crm:dashboard' %}" class="btn btn-outline-light px-4">Перейти в Дашборд</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

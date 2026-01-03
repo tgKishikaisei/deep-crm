@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Сделка: {{ deal.title }}{% endblock %}
+
+{% block content %}
+<div class="container animate-fade-in" style="margin-top: 5vh;">
+
+    <!-- Кнопка "Назад" (над карточкой) -->
+    <a href="{% url 'crm:deal_list' %}" class="btn btn-link text-white-50 text-decoration-none mb-3 ps-0 hover-neon">
+        <i class="fa-solid fa-arrow-left me-2"></i> К списку сделок
+    </a>
+
+    <div class="row">
+
+        <!-- ЛЕВАЯ КОЛОНКА: Основная информация -->
+        <div class="col-lg-8 mb-4">
+            <div class="card glass-panel border-0 shadow-lg h-100">
+                <div class="card-body p-5">
+
+                    <!-- Заголовок и Действия -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <small class="text-info text-uppercase fw-bold ls-1">Детали сделки</small>
+                            <h1 class="fw-bold text-white mt-2 mb-0">{{ deal.title }}</h1>
+                        </div>
+
+                        <!-- Кнопки действий -->
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'crm:deal_update' deal.pk %}" class="btn btn-outline-warning btn-icon" title="Редактировать">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            {% if user.role == 'ADMIN' %}
+                                <a href="{% url 'crm:deal_delete' deal.pk %}" class="btn btn-outline-danger btn-icon" title="Удалить">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4">
+
+                    <!-- Сетка с данными -->
+                    <div class="row g-4">
+
+                        <!-- Клиент -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
+                                <label class="d-block text-white-50 small text-uppercase mb-1">
+                                    <i class="fa-regular fa-building me-1"></i> Клиент
+                                </label>
+                                <a href="{% url 'crm:client_detail' deal.client.pk %}" class="fs-5 fw-bold text-white text-decoration-none hover-link">
+                                    {{ deal.client.company_name }} <i class="fa-solid fa-external-link-alt ms-1 small text-muted"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Сумма -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded" style="background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.2);">
+                                <label class="d-block text-white-50 small text-uppercase mb-1">
+                                    <i class="fa-solid fa-sack-dollar me-1"></i> Сумма сделки
+                                </label>
+                                <span class="fs-4 fw-bold text-success">{{ deal.amount|floatformat:0 }} ₽</span>
+                            </div>
+                        </div>
+
+                        <!-- Стадия -->
+                        <div class="col-md-6">
+                            <label class="d-block text-white-50 small text-uppercase mb-2">Текущая стадия</label>
+                            {% if deal.stage == 'NEW' %}
+                                <span class="badge-lg-neon status-new"><i class="fa-solid fa-star me-2"></i> Новая</span>
+                            {% elif deal.stage == 'IN_PROGRESS' %}
+                                <span class="badge-lg-neon status-progress"><i class="fa-solid fa-spinner me-2"></i> В работе</span>
+                            {% elif deal.stage == 'WON' %}
+                                <span class="badge-lg-neon status-won"><i class="fa-solid fa-check me-2"></i> Успешно закрыта</span>
+                            {% else %}
+                                <span class="badge-lg-neon status-lost"><i class="fa-solid fa-xmark me-2"></i> Провал</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Менеджер -->
+                        <div class="col-md-6">
+                            <label class="d-block text-white-50 small text-uppercase mb-2">Ответственный</label>
+                            <div class="d-flex align-items-center">
+                                <div class="manager-avatar me-3" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                    {{ deal.manager.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ deal.manager.username }}</div>
+                                    <small class="text-muted">Менеджер</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Дата -->
+                        <div class="col-12 mt-4 pt-3 border-top border-secondary">
+                            <small class="text-muted">
+                                <i class="fa-regular fa-clock me-1"></i> Сделка создана: {{ deal.created_at|date:"d E Y, H:i" }}
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+<!-- ПРАВАЯ КОЛОНКА: Задачи -->
+        <div class="col-lg-4">
+            <div class="card glass-panel border-0 shadow-lg h-100">
+                <div class="card-header bg-transparent border-bottom border-secondary p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold text-white"><i class="fa-solid fa-list-check me-2 text-primary"></i> Задачи</h4>
+
+                        <!-- КНОПКА ДОБАВЛЕНИЯ ЗАДАЧИ -->
+                        <a href="{% url 'crm:task_create' deal.pk %}" class="btn btn-sm btn-primary rounded-circle shadow-neon" title="Добавить задачу">
+                            <i class="fa-solid fa-plus"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+
+                    {% if deal.tasks.all %}
+                        <div class="list-group list-group-flush">
+                            {% for task in deal.tasks.all %}
+                                <div class="list-group-item bg-transparent border-bottom border-secondary px-4 py-3 task-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-start">
+
+                                        <!-- Информация о задаче -->
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-1">
+                                                {% if task.status == 'COMPLETED' %}
+                                                    <i class="fa-regular fa-circle-check text-success me-2"></i>
+                                                    <span class="text-decoration-line-through text-white-50">{{ task.title }}</span>
+                                                {% else %}
+                                                    <i class="fa-regular fa-circle text-warning me-2"></i>
+                                                    <span class="fw-bold text-white">{{ task.title }}</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <small class="text-info">
+                                                <i class="fa-regular fa-clock me-1"></i> {{ task.due_date|date:"d.m H:i" }}
+                                            </small>
+                                        </div>
+
+                                        <!-- Меню действий (Редактировать/Удалить) -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-link text-white-50 p-0" type="button" data-bs-toggle="dropdown">
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-dark glass-dropdown">
+                                                <li><a class="dropdown-item" href="{% url 'crm:task_update' task.pk %}"><i class="fa-solid fa-pen me-2"></i> Изменить</a></li>
+                                                <li><a class="dropdown-item text-danger" href="{% url 'crm:task_delete' task.pk %}"><i class="fa-solid fa-trash me-2"></i> Удалить</a></li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-white-50">
+                            <i class="fa-solid fa-clipboard-list fa-3x mb-3 opacity-25"></i>
+                            <p>Нет активных задач</p>
+                            <a href="{% url 'crm:task_create' deal.pk %}" class="btn btn-outline-info btn-sm">Создать первую</a>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Локальные стили для этой страницы */
+
+    .ls-1 { letter-spacing: 1px; }
+
+    .hover-neon:hover {
+        color: #00d2ff !important;
+        text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+    }
+
+    .hover-link:hover {
+        color: #00d2ff !important;
+    }
+
+    /* Квадратные кнопки действий */
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+    /* Большие неоновые бейджи для статуса */
+    .badge-lg-neon {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    /* Анимация появления */
+    .animate-fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+    {% if deal.stage == 'WON' %}
+    <script>
+        // Запускаем салют при загрузке страницы, если сделка успешна
+        window.onload = function() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+            function randomInOut(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+
+              // Стреляем конфетти с двух сторон экрана
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInOut(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInOut(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        };
+    </script>
+    {% endif %}
+{% endblock %}

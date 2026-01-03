@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}О Нас{% endblock %}
+
+{% block content %}
+<div class="container text-center" style="margin-top: 10vh;">
+    
+    <!-- ВИДЕО-ТЕКСТ -->
+    <div class="video-text-container mb-5" data-aos="zoom-in">
+        <h1 class="video-text">FUTURE IS NOW</h1>
+        <!-- Видео на фоне (можешь заменить ссылку на свое видео) -->
+        <video autoplay muted loop class="text-video-bg">
+            <source src="https://cdn.pixabay.com/vimeo/328940142/cosmos-22837.mp4?width=1280&hash=d82998670f5909205566675034636605df07007a" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 glass-panel p-5" data-aos="fade-up" data-aos-delay="300">
+            <h2 class="text-white fw-bold mb-4">Мы создаем <span style="color: #00d2ff;">будущее</span></h2>
+            <p class="lead text-white-50">
+                Deep CRM — это не просто таблица с данными. Это экосистема, которая позволяет вам управлять бизнесом со скоростью света.
+                Мы используем передовые технологии Django и реактивного интерфейса.
+            </p>
+            
+            <div class="row mt-5">
+                <div class="col-4">
+                    <h3 class="fw-bold text-white">500+</h3>
+                    <small class="text-info">Клиентов</small>
+                </div>
+                <div class="col-4">
+                    <h3 class="fw-bold text-white">1M+</h3>
+                    <small class="text-success">Сделок</small>
+                </div>
+                <div class="col-4">
+                    <h3 class="fw-bold text-white">24/7</h3>
+                    <small class="text-warning">Поддержка</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- CINEAMATIC HOVER SECTION -->
+    <div class="container-fluid p-0 mt-5 position-relative overflow-hidden" style="height: 100vh;">
+
+        <!-- ВИДЕО-СЛОИ (Фоны) -->
+        <div class="video-layer active" id="vid-default">
+            <video autoplay muted loop playsinline>
+                <source src="https://videos.pexels.com/video-files/856309/856309-hd_1920_1080_30fps.mp4"  type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+        </div>
+
+        <div class="video-layer" id="vid-speed">
+            <!-- Видео Скорости (Туннель) -->
+            <video autoplay muted loop playsinline>
+                <source src="https://videos.pexels.com/video-files/856309/856309-hd_1920_1080_30fps.mp4"  type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+        </div>
+
+        <div class="video-layer" id="vid-security">
+            <!-- Видео Безопасности (Код/Замок) -->
+            <video autoplay muted loop playsinline>
+                <source src="{% static 'videos/3942468-sd_960_540_30fps.mp4' %}" type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+        </div>
+
+        <div class="video-layer" id="vid-ai">
+            <!-- Видео ИИ (Мозг/Нейросеть) -->
+            <video autoplay muted loop playsinline>
+                <source src="https://videos.pexels.com/video-files/3129595/3129595-hd_1920_1080_30fps.mp4"  type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+        </div>
+
+        <!-- СПИСОК (Меню) -->
+        <div class="container h-100 d-flex flex-column justify-content-center position-relative z-2">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h2 class="text-white-50 mb-5 text-uppercase ls-2">Наши технологии</h2>
+
+                    <ul class="hover-list list-unstyled">
+                        <li>
+                            <a href="#" class="hover-item" data-target="vid-speed">
+                                <span class="index">01</span>
+                                <span class="text">Скорость Света</span>
+                                <i class="fa-solid fa-arrow-right arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="hover-item" data-target="vid-security">
+                                <span class="index">02</span>
+                                <span class="text">Кибер-Защита</span>
+                                <i class="fa-solid fa-arrow-right arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="hover-item" data-target="vid-ai">
+                                <span class="index">03</span>
+                                <span class="text">Нейросеть AI</span>
+                                <i class="fa-solid fa-arrow-right arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        /* 1. Настройка слоев видео */
+        .video-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            z-index: 0;
+        }
+
+        .video-layer.active {
+            opacity: 1;
+        }
+
+        .video-layer video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Затемнение видео, чтобы текст читался */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        /* 2. Стиль списка */
+        .hover-list .hover-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: 0.4s;
+        }
+
+        .hover-list .hover-item:hover {
+            padding-left: 30px;
+            color: #00d2ff;
+            border-bottom-color: #00d2ff;
+        }
+
+        /* Цифры (01, 02...) */
+        .hover-list .index {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            color: #666;
+            margin-right: 30px;
+        }
+
+        /* Текст пунктов */
+        .hover-list .text {
+            font-size: 4rem; /* Огромный текст */
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+
+        /* Стрелка */
+        .hover-list .arrow {
+            font-size: 2rem;
+            margin-left: auto; /* Прижимает вправо */
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: 0.4s;
+        }
+
+        .hover-list .hover-item:hover .arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Адаптив для мобильных */
+        @media (max-width: 768px) {
+            .hover-list .text { font-size: 2.5rem; }
+        }
+    </style>
+
+    <script>
+        // JS для переключения видео при наведении
+        document.querySelectorAll('.hover-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                // 1. Убираем класс active у всех видео
+                document.querySelectorAll('.video-layer').forEach(vid => vid.classList.remove('active'));
+
+                // 2. Находим нужное видео по ID
+                const targetId = this.getAttribute('data-target');
+                const targetVid = document.getElementById(targetId);
+
+                // 3. Показываем его
+                if (targetVid) targetVid.classList.add('active');
+            });
+
+            // (Опционально) Возврат к дефолтному видео при уходе мышки
+            /*
+            item.addEventListener('mouseleave', function() {
+                document.querySelectorAll('.video-layer').forEach(vid => vid.classList.remove('active'));
+                document.getElementById('vid-default').classList.add('active');
+            });
+            */
+        });
+    </script>
+
+    </div>
+
+    <style>
+        /* Магия видео-текста */
+        .video-text-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .video-text {
+            font-size: 8rem; /* Огромный размер */
+            font-weight: 900;
+            text-transform: uppercase;
+            background: black; /* Фолбек */
+            color: white;
+            mix-blend-mode: multiply; /* Смешивание слоев */
+            margin: 0;
+            line-height: 1;
+            position: relative;
+            z-index: 2;
+            background-color: #000; /* Фон вокруг букв */
+        }
+
+        /* Видео лежит ПОД текстом, но текст работает как маска */
+        .text-video-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* Альтернативный современный способ (лучше поддержка) */
+        @supports (-webkit-background-clip: text) {
+            .video-text-container {
+                background: none;
+            }
+            .text-video-bg {
+                display: none; /* Скрываем видео-тег */
+            }
+            .video-text {
+                /* Ставим видео как фон текста */
+                background-image: url('https://cdn.pixabay.com/user/2023/11/20/12-32-34-310_256x256.gif'); /* Для примера гифка, для видео нужен сложный JS, поэтому используем GIF или картинку космоса */
+                background-image: url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExYnJ2eW12cnZ5bXZydnltdnJ2eW12cnZ5bXZydnltdnJ2eW12ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/U3qYN8S0j3bpK/giphy.gif');
+                background-size: cover;
+                background-position: center;
+                -webkit-background-clip: text;
+                color: transparent;
+                mix-blend-mode: normal;
+                background-color: transparent;
+            }
+        }
+    </style>
+{% endblock %}

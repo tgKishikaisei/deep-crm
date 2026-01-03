@@ -1,0 +1,713 @@
+/* static/css/style.css */
+
+/** Фон для Vanta.js */
+/*vanta-bg {
+/*   position: fixed;
+/*   width: 100%;
+/*   height: 100vh;
+/*   top: 0;
+/*   left: 0;
+/*   z-index: -1;
+/*
+
+
+/** Эффект матового стекла (Glassmorphism) */
+/*glass-card {
+/*   background: rgba(255, 255, 255, 0.1);
+/*   backdrop-filter: blur(10px);
+/*   -webkit-backdrop-filter: blur(10px);
+/*   border: 1px solid rgba(255, 255, 255, 0.2);
+/*   border-radius: 15px;
+/*   color: white;
+/*
+
+/** Кастомизация полей  ввода для темного фона */
+/*form-control {
+/*   background: rgba(255, 255, 255, 0.2) !important;
+/*   border: none;
+/*   color: white !important;
+/*
+
+/*form-control::placeholder {
+/*   color: rgba(255, 255, 255, 0.6);
+/*
+
+/*form-control:focus {
+/*   background: rgba(255. 255, 255, 0.3) !important;
+/*   color: white !important;
+/*   box-shadow: none;
+/*   border: 1px solid rgba(255, 255, 255, 0.5);
+/*
+
+/*form-label {
+/*   color: rgba(255, 255, 255, 0.5)
+/*
+
+/** Красивая кнопка */
+/*btn-space {
+/*   background-color: #6c5ce7;
+/*   border: none;
+/*   transition: transform 0.2s;
+/*
+
+/*btn-space:hover {
+/*   background-color: #5a4bcf;
+/*   transform: scale(1.05); /* Легкое увеличение при наведение */
+/*}
+
+
+/* static/css/style.css */
+
+/* 1. Глобальные настройки */
+body {
+    background-color: #050510;
+    font-family: 'Segoe UI', sans-serif;
+    color: #e0e0e0; /* Светло-серый текст для читаемости на темном */
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    overflow-x: hidden; /* Чтобы не было горизонтальной прокрутки */
+}
+
+a {
+    text-decoration: none;
+    color: white
+}
+a:hover {
+    color: #00d2ff;
+}
+
+/* Фон анимации */
+#vanta-bg {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+/* --- 2. Исправление полей ввода (Login Fix) --- */
+/* Делаем поля темными и полупрозрачными */
+.form-control {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff !important; /* Белый текст */
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-color: #00d2ff;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+}
+
+/* Цвет подсказки (placeholder) */
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* --- 3. Эффект Стекла (Glassmorphism) --- */
+.glass-panel {
+    background: rgba(20, 30, 48, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    color: white;
+}
+
+/* --- 4. Боковое меню (Sidebar) --- */
+.offcanvas {
+    background: rgba(10, 10, 20, 0.95) !important; /* Почти черный фон */
+    color: white;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+/* static/css/style.css */
+
+.btn-menu {
+    position: fixed;
+    top: 20px;
+    left: 20px; /* <--- ИЗМЕНИЛИ: Было right: 30px, Стало left: 20px */
+    z-index: 1000;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.2); /* Добавим рамку для красоты */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    transition: 0.3s;
+}
+
+/* Добавим отступ для основного контента, чтобы кнопка меню не закрывала заголовок */
+main {
+    padding-top: 60px; /* Опускаем контент чуть ниже */
+}
+
+.btn-menu:hover {
+    background: white;
+    color: black;
+}
+
+.nav-link-custom {
+    font-size: 1.5rem;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: block;
+    transition: 0.3s;
+}
+.nav-link-custom:hover {
+    padding-left: 10px;
+    color: #00d2ff;
+}
+
+/* --- 5. Слайдер (Swiper) --- */
+.swiper {
+    width: 100%;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.swiper-slide {
+    background-position: center;
+    background-size: cover;
+    width: 300px; /* Ширина карточки */
+    height: 450px; /* Высота карточки */
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    /* Эффект стекла для карточки */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s;
+}
+
+.swiper-slide:hover {
+    transform: scale(1.05);
+    border-color: #00d2ff;
+}
+
+.slide-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+}
+
+.slide-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #00d2ff;
+}
+
+.slide-desc {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+/* Эффект свечения при наведении на карточки и таблицы */
+.card, .table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Чуть приподнимается */
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.3) !important; /* Голубое свечение */
+    border-color: rgba(0, 210, 255, 0.5) !important;
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05); /* Подсветка строки */
+    box-shadow: inset 5px 0 0 #00d2ff; /* Полоска слева */
+}
+
+/* Красивый скроллбар (тонкий и синий) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0a0a14;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #00d2ff;
+}
+
+/* --- ИСПРАВЛЕНИЕ СПИСКА СДЕЛОК (DASHBOARD FIX) --- */
+
+/* 1. Делаем строки списка прозрачными и текст белым */
+.list-group-item {
+    background-color: transparent !important; /* Убираем белый фон */
+    color: white !important; /* Текст делаем белым и читаемым */
+    border: none; /* Убираем рамки по бокам */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; /* Тонкая линия снизу */
+    transition: all 0.3s ease; /* Плавность для анимации */
+    padding: 15px; /* Чуть больше воздуха */
+}
+
+/* 2. Ссылки внутри списка (Названия сделок) */
+.list-group-item a {
+    color: #00d2ff !important; /* Ярко-голубой (Cyberpunk) */
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+/* 3. Маленький текст (Название компании) */
+.list-group-item small {
+    color: #cccccc !important; /* Светло-серый, чтобы читался, но не отвлекал */
+    display: block; /* С новой строки */
+    margin-top: 4px;
+}
+
+/* 4. Сумма сделки (справа) */
+.list-group-item span.float-end {
+    color: #2ecc71 !important; /* Зеленый (деньги) */
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* --- ЭФФЕКТ ПРИ НАВЕДЕНИИ (HOVER) --- */
+.list-group-item:hover {
+    /* Меняем фон на полупрозрачный голубой */
+    background-color: rgba(0, 210, 255, 0.15) !important;
+
+    /* Добавляем неоновое свечение */
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+
+    /* Слегка сдвигаем вправо и увеличиваем */
+    transform: translateX(10px) scale(1.02);
+
+    /* Делаем левую границу яркой */
+    border-left: 4px solid #00d2ff !important;
+    border-radius: 4px;
+
+    z-index: 10; /* Чтобы элемент был поверх остальных */
+}
+
+
+/* --- НОВЫЕ СТИЛИ ДЛЯ ГЛАВНОЙ --- */
+
+/* 1. Секция "Особенности" (Карточки) */
+.feature-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    transition: 0.4s;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(0, 210, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: 0.6s;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 25px rgba(0, 210, 255, 0.2);
+    border-color: #00d2ff;
+}
+
+.feature-card:hover::before {
+    transform: translateX(100%);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: #00d2ff;
+    margin-bottom: 20px;
+}
+
+/* 2. Секция FAQ (Аккордеон в стиле стекла) */
+.accordion-glass .accordion-item {
+    background: rgba(20, 30, 48, 0.6);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-bottom: 10px;
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.accordion-glass .accordion-button {
+    background: transparent;
+    color: white;
+    font-weight: bold;
+    box-shadow: none;
+}
+
+.accordion-glass .accordion-button:not(.collapsed) {
+    background: rgba(0, 210, 255, 0.1);
+    color: #00d2ff;
+}
+
+.accordion-glass .accordion-button::after {
+    filter: invert(1); /* Делаем стрелку белой */
+}
+
+/* 3. Футер */
+.footer-glass {
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 40px 0;
+    margin-top: 80px;
+    color: #aaa;
+}
+
+
+/* --- PRELOADER --- */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #050510; /* Цвет нашего фона */
+    z-index: 9999; /* Поверх всего */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+/* Класс для скрытия прелоадера */
+.preloader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+
+/* --- СТИЛИ ДЛЯ СПИСКА СДЕЛОК --- */
+
+/* 1. Стеклянная таблица */
+.table-glass {
+    --bs-table-bg: transparent;
+    --bs-table-color: #fff;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Отступы между строками */
+}
+
+.table-glass thead th {
+    border: none;
+    color: #00d2ff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 15px;
+}
+
+.table-glass tbody tr {
+    background: rgba(20, 30, 48, 0.6);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Скругление углов у строки */
+.table-glass tbody tr td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+.table-glass tbody tr td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+
+.table-glass td {
+    border: none;
+    vertical-align: middle;
+    padding: 20px 15px;
+    color: white;
+}
+
+/* Эффект наведения на строку */
+.table-glass tbody tr:hover {
+    transform: scale(1.01);
+    background: rgba(0, 210, 255, 0.15);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+    z-index: 2;
+    position: relative;
+}
+
+/* 2. Неоновые статусы (Бейджи) */
+.badge-neon {
+    padding: 8px 12px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px currentColor; /* Свечение цветом текста */
+}
+
+.status-new { color: #00d2ff; background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.3); }
+.status-progress { color: #f1c40f; background: rgba(241, 196, 15, 0.1); border: 1px solid rgba(241, 196, 15, 0.3); }
+.status-won { color: #2ecc71; background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.3); }
+.status-lost { color: #e74c3c; background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); }
+
+/* 3. Аватарка менеджера */
+.manager-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
+    margin-right: 10px;
+}
+
+/* 4. Кнопки действий (Иконки) */
+.action-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    color: white;
+    background: rgba(255,255,255,0.1);
+    margin: 0 2px;
+}
+.action-btn:hover { color: white; transform: translateY(-3px); }
+.btn-edit:hover { background: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
+.btn-delete:hover { background: #e74c3c; box-shadow: 0 0 10px #e74c3c; }
+.btn-view:hover { background: #00d2ff; box-shadow: 0 0 10px #00d2ff; }
+
+/* 5. Анимация появления строк */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-row {
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0; /* Изначально скрыты */
+}
+
+
+/* Стилизация выпадающих списков (Select) */
+.form-select {
+    background-color: rgba(0, 0, 0, 0.3) !important; /* Темный фон */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff !important; /* Белый текст */
+    border-radius: 8px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important; /* Белая стрелочка */
+}
+
+.form-select:focus {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border-color: #00d2ff;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+}
+
+/* Стилизация опций внутри селекта (они всегда белые у браузера, но мы сделаем их темными) */
+.form-select option {
+    background-color: #1e1e2e;
+    color: white;
+}
+
+
+/* --- KANBAN STYLES --- */
+
+/* Колонки */
+.kanban-col {
+    background: rgba(10, 10, 20, 0.4) !important; /* Еще темнее чем обычное стекло */
+    transition: 0.3s;
+}
+
+/* Карточки */
+.kanban-card {
+    background: rgba(255, 255, 255, 0.05) !important; /* Очень легкая прозрачность */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    cursor: pointer;
+}
+
+/* Эффект наведения на карточку */
+.kanban-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 210, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(0, 210, 255, 0.5);
+}
+
+/* Ссылка внутри карточки */
+.kanban-card a.hover-link:hover {
+    color: #00d2ff !important;
+}
+
+/* --- КРАСИВЫЙ СКРОЛЛБАР ВНУТРИ КОЛОНОК --- */
+.custom-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 210, 255, 0.6);
+}
+
+/* Z-index fix для кнопки редактирования */
+.z-2 { z-index: 2; }
+
+
+
+/* --- СТИЛИ ДЛЯ КАРТОЧЕК KANBAN --- */
+
+/* 1. Сама карточка (Темное стекло) */
+.kanban-card {
+    background: rgba(30, 40, 60, 0.6) !important; /* Темно-синий полупрозрачный */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    color: white;
+    cursor: pointer;
+}
+
+/* 2. Эффект при наведении (Подсветка) */
+.kanban-card:hover {
+    transform: translateY(-5px) scale(1.02); /* Чуть всплывает и увеличивается */
+    background: rgba(40, 50, 80, 0.8) !important; /* Становится чуть светлее */
+    border-color: #00d2ff; /* Рамка становится неоновой */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5),
+                0 0 15px rgba(0, 210, 255, 0.3); /* Неоновое свечение */
+    z-index: 10;
+}
+
+/* 3. Ссылка-заголовок */
+.glow-link {
+    color: #ffffff !important;
+    transition: 0.3s;
+}
+.kanban-card:hover .glow-link {
+    color: #00d2ff !important; /* При наведении на карточку заголовок голубеет */
+}
+
+/* 4. Тонкая линия внутри карточки */
+.border-white-10 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 5. Стеклянная круглая кнопка редактирования */
+.btn-icon-glass {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: 0.3s;
+}
+
+.btn-icon-glass:hover {
+    background: #00d2ff;
+    color: black;
+    box-shadow: 0 0 10px #00d2ff;
+}
+
+/* Z-index fix, чтобы кнопка работала поверх stretched-link */
+.z-2 {
+    z-index: 2;
+}
+
+
+/* --- SPOTLIGHT SEARCH --- */
+#search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* Затемнение */
+    backdrop-filter: blur(8px); /* Размытие фона */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    padding-top: 15vh;
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+.search-container {
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 0 50px rgba(0, 210, 255, 0.3);
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+
+
+
+/* Список результатов поиска */
+.search-results {
+    margin-top: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Элемент результата */
+.search-item {
+    background: rgba(255, 255, 255, 0.05); /* Полупрозрачный фон */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white !important;
+    transition: 0.2s;
+    cursor: pointer;
+    text-decoration: none; /* Убираем подчеркивание */
+}
+
+.search-item:hover {
+    background: rgba(0, 210, 255, 0.2); /* Подсветка при наведении */
+    border-color: #00d2ff;
+    transform: translateX(5px);
+}
+
+.search-item small {
+    color: #aaa !important;
+}
+
+
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    box-shadow: 0 0 10px #00d2ff;
+    z-index: 10000; /* Поверх всего */
+    transition: width 0.1s;
+}

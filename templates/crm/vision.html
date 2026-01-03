@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Vision - Наше Будущее{% endblock %}
+
+{% block content %}
+<!-- КОНТЕЙНЕР ДЛЯ ФОНОВЫХ ВИДЕО (Фиксированный) -->
+<div class="video-background-container">
+    <!-- Видео 1: Космос (Начало) -->
+    <video class="bg-video active" id="vid-1" autoplay muted loop playsinline>
+        <source src="{% static 'videos/black_circle.mp4' %}" type="video/mp4">
+    </video>
+    
+    <!-- Видео 2: Кибер-город (Технологии) -->
+    <video class="bg-video" id="vid-2" autoplay muted loop playsinline>
+        <source src="{% static 'videos/city.mp4' %}" type="video/mp4">
+    </video>
+    
+    <!-- Видео 3: Сеть (Связи) -->
+    <video class="bg-video" id="vid-3" autoplay muted loop playsinline>
+        <source src="https://videos.pexels.com/video-files/3129595/3129595-hd_1920_1080_30fps.mp4" type="video/mp4">
+    </video>
+
+    <div class="video-overlay"></div>
+</div>
+
+<!-- СКРОЛЛ-КОНТЕНТ (Секции) -->
+<div class="scroll-container">
+
+    <!-- Секция 1 -->
+    <section class="scroll-section" data-video="vid-1">
+        <div class="content-box glass-card" data-aos="fade-up">
+            <h1 class="display-1 fw-bold">НАЧАЛО</h1>
+            <p class="lead">Мы начинали как простой стартап. <br>Теперь мы покоряем галактику.</p>
+        </div>
+    </section>
+
+    <!-- Секция 2 -->
+    <section class="scroll-section" data-video="vid-2">
+        <div class="content-box glass-card" data-aos="fade-left">
+            <h1 class="display-1 fw-bold text-info">ТЕХНОЛОГИИ</h1>
+            <p class="lead">Искусственный интеллект, нейросети, Big Data. <br>Всё это внутри Deep CRM.</p>
+        </div>
+    </section>
+
+    <!-- Секция 3 -->
+    <section class="scroll-section" data-video="vid-3">
+        <div class="content-box glass-card" data-aos="fade-right">
+            <h1 class="display-1 fw-bold text-warning">СВЯЗЬ</h1>
+            <p class="lead">Мгновенный обмен данными между отделами. <br>Никаких задержек.</p>
+            <a href="{% url 'crm:dashboard' %}" class="btn btn-outline-warning btn-lg mt-4 rounded-pill px-5 magnetic-btn">
+                ВЕРНУТЬСЯ НА БАЗУ
+            </a>
+        </div>
+    </section>
+
+</div>
+
+<style>
+    /* 1. ФИКСИРОВАННЫЙ ФОН */
+    .video-background-container {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100vh;
+        z-index: -1;
+        background: black;
+    }
+
+    .bg-video {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        object-fit: cover;
+        opacity: 0; /* Скрыто по умолчанию */
+        transition: opacity 1.5s ease-in-out; /* ПЛАВНЫЙ ПЕРЕХОД */
+    }
+
+    .bg-video.active {
+        opacity: 1; /* Видимо */
+    }
+
+    .video-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); /* Затемнение */
+    }
+
+    /* 2. СЕКЦИИ СКРОЛЛА */
+    .scroll-container {
+        position: relative;
+        z-index: 2;
+    }
+
+    .scroll-section {
+        min-height: 100vh; /* Каждая секция на весь экран */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Отступы, чтобы было место поскроллить */
+        padding: 50px;
+    }
+
+    /* 3. КАРТОЧКИ С ТЕКСТОМ */
+    .content-box {
+        padding: 60px;
+        max-width: 800px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.3); /* Темное стекло */
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 30px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    h1 { letter-spacing: 5px; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+    
+    /* Магнитная кнопка */
+    .magnetic-btn { transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+</style>
+
+<script>
+    // --- МАГИЯ СКРОЛЛА ---
+    
+    // Находим все секции и все видео
+    const sections = document.querySelectorAll('.scroll-section');
+    const videos = document.querySelectorAll('.bg-video');
+
+    // Настройки наблюдателя (когда срабатывать)
+    const options = {
+        threshold: 0.5 // Срабатывает, когда 50% секции видно на экране
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // 1. Узнаем, какое видео нужно этой секции
+                const videoId = entry.target.getAttribute('data-video');
+                
+                // 2. Скрываем все видео
+                videos.forEach(video => {
+                    video.classList.remove('active');
+                });
+
+                // 3. Показываем нужное видео
+                const activeVideo = document.getElementById(videoId);
+                if (activeVideo) {
+                    activeVideo.classList.add('active');
+                }
+            }
+        });
+    }, options);
+
+    // Запускаем слежку за каждой секцией
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+
+    // --- МАГНИТНАЯ КНОПКА (БОНУС) ---
+    const btn = document.querySelector('.magnetic-btn');
+    if(btn) {
+        btn.addEventListener('mousemove', (e) => {
+            const x = e.offsetX - btn.offsetWidth / 2;
+            const y = e.offsetY - btn.offsetHeight / 2;
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = `translate(0px, 0px)`;
+        });
+    }
+</script>
+{% endblock %}

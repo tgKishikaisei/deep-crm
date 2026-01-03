@@ -1,0 +1,46 @@
+# --- Python (Мусор от языка) ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Django (Локальные данные) ---
+*.log
+db.sqlite3
+db.sqlite3-journal
+
+# --- Безопасность (САМОЕ ВАЖНОЕ!) ---
+.env
+.env.local
+.env.*
+secrets.json
+
+# --- Виртуальное окружение ---
+venv/
+env/
+.venv/
+.env/
+
+# --- Статика и Медиа ---
+# Мы не храним собранную статику (она собирается на сервере командой collectstatic)
+staticfiles/
+# Мы не храним загруженные пользователями файлы (картинки, документы)
+media/
+
+# --- Docker ---
+# Если ты используешь локальные папки для базы данных
+postgres_data/
+redis_data/
+
+# --- IDE (Настройки редактора, они у каждого свои) ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Celery (Временные файлы планировщика) ---
+celerybeat-schedule
+celerybeat.pid
+
+# --- Операционные системы ---
+.DS_Store
+Thumbs.db

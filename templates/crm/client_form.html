@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Редактирование клиента{% else %}Новый клиент{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
+        <div class="col-md-8 col-lg-6">
+            
+            <!-- Стеклянная панель -->
+            <div class="card glass-panel border-0 shadow-lg animate-fade-in" style="backdrop-filter: blur(20px);">
+                
+                <div class="card-body p-5">
+                    <!-- Заголовок -->
+                    <h2 class="text-center mb-4 fw-bold text-white">
+                        {% if form.instance.pk %}
+                            <i class="fa-solid fa-user-pen text-warning me-2"></i> Редактирование
+                        {% else %}
+                            <i class="fa-solid fa-user-plus text-primary me-2"></i> Новый клиент
+                        {% endif %}
+                    </h2>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Поле: Название компании -->
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                <i class="fa-solid fa-building me-1"></i> Название компании
+                            </label>
+                            {% render_field form.company_name class="form-control" placeholder="Например: ООО Вектор" %}
+                            {% if form.company_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.company_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Поле: Контактное лицо -->
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                <i class="fa-regular fa-user me-1"></i> Контактное лицо
+                            </label>
+                            {% render_field form.contact_person class="form-control" placeholder="ФИО" %}
+                            {% if form.contact_person.errors %}
+                                <div class="text-danger small mt-1">{{ form.contact_person.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Ряд: Email и Телефон -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                    <i class="fa-solid fa-envelope me-1"></i> Email
+                                </label>
+                                {% render_field form.email class="form-control" placeholder="mail@example.com" %}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                    <i class="fa-solid fa-phone me-1"></i> Телефон
+                                </label>
+                                {% render_field form.phone class="form-control" placeholder="+998..." %}
+                                {% if form.phone.errors %}
+                                    <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Поле: Менеджер (Отображается только если админ передал его в форму) -->
+                        {% if form.manager %}
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                <i class="fa-solid fa-user-tie me-1"></i> Менеджер
+                            </label>
+                            {% render_field form.manager class="form-select" %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-neon">
+                                <i class="fa-solid fa-check me-2"></i> Сохранить
+                            </button>
+                            <a href="{% url 'crm:client_list' %}" class="btn btn-outline-light">
+                                Отмена
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Анимация появления */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Эффект свечения кнопки */
+    .shadow-neon {
+        box-shadow: 0 0 15px rgba(13, 110, 253, 0.5);
+        transition: 0.3s;
+    }
+    .shadow-neon:hover {
+        box-shadow: 0 0 25px rgba(13, 110, 253, 0.8);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

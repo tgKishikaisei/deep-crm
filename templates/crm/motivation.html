@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Battle Mode{% endblock %}
+
+{% block content %}
+<!-- Звук меча (найди короткий mp3 файл и положи в static/audio/sword.mp3) -->
+<!-- Если файла пока нет, код не сломается, просто звука не будет -->
+<audio id="sword-sound">
+    <source src="{% static 'audio/sword.mp3' %}" type="audio/mpeg">
+</audio>
+
+<!-- Огненный курсор -->
+<!--<div id="fire-cursor"></div>-->
+<!-- Контейнер на весь экран -->
+<div class="fire-scene">
+    
+    <!-- 1. ВИДЕО ФОН -->
+    <div class="video-bg">
+        <!-- СЮДА ВСТАВИШЬ ССЫЛКУ НА СВОЕ ВИДЕО -->
+        <!-- Пока поставил эпичное видео с огнем для примера -->
+        <video autoplay muted loop playsinline>
+            <source src="{% static 'videos/sword.mp4' %}" type="video/mp4">        </video>
+        <!-- Затемнение, чтобы текст читался -->
+        <div class="overlay"></div>
+    </div>
+
+    <!-- 2. ХОЛСТ ДЛЯ ИСКР (JS) -->
+    <canvas id="embers"></canvas>
+
+    <!-- 3. КОНТЕНТ ПО ЦЕНТРУ -->
+    <div class="content text-center">
+        <h1 class="fire-text">IGNITE YOUR SALES</h1>
+        <p class="lead text-white text-uppercase ls-2 mb-5">Уничтожай цели. Побеждай конкурентов.</p>
+        
+        <div class="row justify-content-center gap-4">
+            <div class="col-auto">
+                <div class="stat-box">
+                    <span class="d-block fs-1 fw-bold text-warning">1</span>
+                    <small>МЕСТО</small>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="stat-box">
+                    <span class="d-block fs-1 fw-bold text-danger">🔥</span>
+                    <small>РЕЖИМ</small>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'crm:deal_create' %}" class="btn btn-danger btn-lg rounded-pill mt-5 px-5 py-3 fire-btn">
+            НАЧАТЬ БИТВУ
+        </a>
+    </div>
+
+</div>
+
+<style>
+    /* --- СТИЛИ СТРАНИЦЫ --- */
+    .fire-scene {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+        overflow: hidden; display: flex; align-items: center; justify-content: center;
+        z-index: 100; /* Перекрывает всё, кроме меню */
+    }
+
+    /* Видео фон */
+    .video-bg {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
+    }
+    .video-bg video {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(to top, #000, transparent);
+    }
+
+    /* Холст для искр */
+    #embers {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+    }
+
+    /* ОГНЕННЫЙ ТЕКСТ */
+    .fire-text {
+        font-size: 6rem;
+        font-weight: 900;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        /* Эффект горения текста */
+        text-shadow: 
+            0 0 10px #ffae00,
+            0 0 20px #ff6600,
+            0 0 40px #ff0000,
+            0 0 80px #ff0000;
+        animation: flicker 2s infinite alternate;
+    }
+
+    /* Анимация мерцания огня */
+    @keyframes flicker {
+        0%, 100% { opacity: 1; text-shadow: 0 0 10px #ffae00, 0 0 20px #ff6600, 0 0 40px #ff0000; }
+        50% { opacity: 0.9; text-shadow: 0 0 20px #ffae00, 0 0 30px #ff6600, 0 0 50px #ff0000; }
+    }
+
+    /* Статистика */
+    .stat-box {
+        background: rgba(0,0,0,0.6);
+        border: 1px solid #ff6600;
+        padding: 20px 40px;
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        color: white;
+        min-width: 150px;
+    }
+
+    /* Огненная кнопка */
+    .fire-btn {
+        background: linear-gradient(45deg, #ff0000, #ff6600);
+        border: none;
+        box-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
+        transition: 0.3s;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+    .fire-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 40px rgba(255, 69, 0, 0.9);
+        color: white;
+    }
+
+    /* Адаптив */
+    @media (max-width: 768px) {
+        .fire-text { font-size: 3rem; }
+    }
+    /* --- ОГНЕННЫЙ КУРСОР --- */
+    #fire-cursor {
+        position: fixed;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 100, 0, 0.8);
+        box-shadow:
+            0 0 20px #ffae00,
+            0 0 40px #ff4500,
+            0 0 60px #ff0000;
+        pointer-events: none; /* Чтобы клики проходили сквозь него */
+        mix-blend-mode: screen; /* Красивое наложение на фон */
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: transform 0.1s ease;
+        opacity: 0; /* Скрыт, пока мышка не двигается */
+    }
+
+    /* Когда мышка нажата, курсор вспыхивает */
+    #fire-cursor.active {
+        transform: translate(-50%, -50%) scale(1.5);
+        background: white;
+        box-shadow: 0 0 50px #ffae00, 0 0 100px #ff0000;
+    }
+</style>
+
+<script>
+    // --- 1. ПАРАЛЛАКС ЭФФЕКТ (3D Движение текста) ---
+    const content = document.querySelector('.content');
+
+    document.addEventListener('mousemove', (e) => {
+        // Вычисляем положение мыши от центра экрана
+        let x = (window.innerWidth / 2 - e.pageX) / 30; // Делим на 30, чтобы движение было плавным
+        let y = (window.innerHeight / 2 - e.pageY) / 30;
+
+        // Двигаем контент
+        content.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+    // --- 2. ОГНЕННЫЙ КУРСОР ---
+    const cursor = document.getElementById('fire-cursor');
+
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.opacity = '1';
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+    });
+
+    // Эффект вспышки при клике
+    document.addEventListener('mousedown', () => cursor.classList.add('active'));
+    document.addEventListener('mouseup', () => cursor.classList.remove('active'));
+
+
+    // --- 3. ЗВУК МЕЧА НА КНОПКЕ ---
+    const btn = document.querySelector('.fire-btn');
+    const sound = document.getElementById('sword-sound');
+
+    // Убавляем громкость, чтобы не оглушило
+    sound.volume = 0.4;
+
+    btn.addEventListener('mouseenter', () => {
+        sound.currentTime = 0; // Перемотать в начало
+        sound.play().catch(error => console.log("Автоплей заблокирован браузером"));
+    });
+
+
+    // --- 4. ИСКРЫ (PARTICLES) - Твой старый код ---
+    const canvas = document.getElementById('embers');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const particleCount = 100;
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = canvas.height + Math.random() * 100;
+            this.speed = Math.random() * 2 + 1;
+            this.size = Math.random() * 3 + 1;
+            this.color = `rgba(255, ${Math.random() * 150 + 50}, 0, ${Math.random()})`;
+            this.drift = Math.random() * 2 - 1;
+        }
+
+        update() {
+            this.y -= this.speed;
+            this.x += this.drift;
+            this.size -= 0.02;
+
+            if (this.size <= 0 || this.y < 0) {
+                this.reset();
+            }
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "orange";
+            ctx.fill();
+        }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+{% endblock %}

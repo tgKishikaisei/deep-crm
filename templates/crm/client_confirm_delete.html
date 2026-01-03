@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Подтверждение удаления клиента{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h1 class="card-title">Подтверждение удаления</h1>
+                    <p class="lead">Вы уверены, что хотите навсегда удалить клиента
+                        <br><strong>"{{ object.company_name }}"</strong>?
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <p class="text-danger">Это действие нельзя будет отменить.
+                            Все связанные с клиентом сделки и задачи также будут удалены
+                        </p>
+                        <div class="d-grid gap-2 d-md-block mt-4">
+                            <!--Кнопка "Отмена" ведет на детальную страницу клиента, что логично-->
+                            <a href="{% url 'crm:client_detail' object.pk %}" class="btn btn-secondary btn-lg">Отмена</a>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                Да, я уверен, удалить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

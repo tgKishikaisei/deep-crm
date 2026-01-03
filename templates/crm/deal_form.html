@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Редактирование сделки{% else %}Новая сделка{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
+        <div class="col-md-8 col-lg-6">
+            
+            <!-- Стеклянная панель -->
+            <div class="card glass-panel border-0 shadow-lg animate-fade-in" style="backdrop-filter: blur(20px);">
+                
+                <div class="card-body p-5">
+                    <!-- Заголовок -->
+                    <h2 class="text-center mb-4 fw-bold text-white">
+                        {% if form.instance.pk %}
+                            <i class="fa-solid fa-pen-to-square text-warning me-2"></i> Редактирование
+                        {% else %}
+                            <i class="fa-solid fa-rocket text-primary me-2"></i> Новая сделка
+                        {% endif %}
+                    </h2>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Поле: Клиент -->
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                <i class="fa-regular fa-user me-1"></i> Клиент
+                            </label>
+                            {% render_field form.client class="form-select" %}
+                            {% if form.client.errors %}
+                                <div class="text-danger small mt-1">{{ form.client.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Поле: Название -->
+                        <div class="mb-4">
+                            <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                <i class="fa-solid fa-heading me-1"></i> Название сделки
+                            </label>
+                            {% render_field form.title class="form-control" placeholder="Например: Продажа оборудования" %}
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <!-- Поле: Сумма -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                    <i class="fa-solid fa-sack-dollar me-1"></i> Сумма
+                                </label>
+                                <div class="input-group">
+                                    {% render_field form.amount class="form-control" placeholder="0.00" %}
+                                    <span class="input-group-text bg-transparent text-white border-secondary">₽</span>
+                                </div>
+                                {% if form.amount.errors %}
+                                    <div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Поле: Стадия -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label text-white-50 small text-uppercase fw-bold">
+                                    <i class="fa-solid fa-stairs me-1"></i> Стадия
+                                </label>
+                                {% render_field form.stage class="form-select" %}
+                            </div>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-neon">
+                                <i class="fa-solid fa-check me-2"></i> Сохранить
+                            </button>
+                            <a href="{% url 'crm:deal_list' %}" class="btn btn-outline-light">
+                                Отмена
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Локальные стили для анимации появления */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Эффект свечения для кнопки */
+    .shadow-neon {
+        box-shadow: 0 0 15px rgba(13, 110, 253, 0.5);
+        transition: 0.3s;
+    }
+    .shadow-neon:hover {
+        box-shadow: 0 0 25px rgba(13, 110, 253, 0.8);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

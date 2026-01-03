@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Сделки{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    
+    <!-- Заголовок и Кнопка -->
+    <div class="d-flex align-items-center justify-content-between mb-5 mt-4 ps-5">
+        <div>
+            <h1 class="fw-bold text-white mb-0" style="text-shadow: 0 0 20px rgba(0,210,255,0.5);">Список сделок</h1>
+            <p class="text-white-50">Управляйте потоком продаж</p>
+        </div>
+        <a href="{% url 'crm:deal_create' %}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-lg" 
+           style="background: linear-gradient(45deg, #00d2ff, #0072ff); border: none;">
+            <i class="fa-solid fa-plus me-2"></i> Новая сделка
+        </a>
+    </div>
+
+    <!-- Фильтры (Опционально, оставляем красивый блок если есть) -->
+    <!-- ... код фильтров (если используешь) ... -->
+
+    <!-- ТАБЛИЦА -->
+    <div class="table-responsive">
+        <table class="table table-glass align-middle">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Клиент</th>
+                    <th>Сумма</th>
+                    <th>Стадия</th>
+                    <th>Менеджер</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for deal in deals %}
+                <!-- Добавляем класс animate-row и задержку для анимации -->
+                <tr class="animate-row" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                    
+                    <!-- Название -->
+                    <td>
+                        <div class="fw-bold fs-5">{{ deal.title }}</div>
+                        <small class="text-white-50">{{ deal.created_at|date:"d M Y" }}</small>
+                    </td>
+                    
+                    <!-- Клиент -->
+                    <td>
+                        <i class="fa-regular fa-building me-2 text-info"></i> {{ deal.client.company_name }}
+                    </td>
+                    
+                    <!-- Сумма -->
+                    <td>
+                        <span class="fw-bold text-success fs-5">{{ deal.amount|floatformat:0 }} ₽</span>
+                    </td>
+                    
+                    <!-- Стадия (Неоновый бейдж) -->
+                    <td>
+                        {% if deal.stage == 'NEW' %}
+                            <span class="badge-neon status-new"><i class="fa-solid fa-star me-1"></i> Новая</span>
+                        {% elif deal.stage == 'IN_PROGRESS' %}
+                            <span class="badge-neon status-progress"><i class="fa-solid fa-spinner me-1"></i> В работе</span>
+                        {% elif deal.stage == 'WON' %}
+                            <span class="badge-neon status-won"><i class="fa-solid fa-check me-1"></i> Успех</span>
+                        {% else %}
+                            <span class="badge-neon status-lost"><i class="fa-solid fa-xmark me-1"></i> Провал</span>
+                        {% endif %}
+                    </td>
+                    
+                    <!-- Менеджер (Аватарка) -->
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="manager-avatar">
+                                {{ deal.manager.username|slice:":1"|upper }}
+                            </div>
+                            <span>{{ deal.manager.username }}</span>
+                        </div>
+                    </td>
+                    
+                    <!-- Действия (Иконки) -->
+                    <td class="text-end">
+                        <a href="{% url 'crm:deal_detail' deal.pk %}" class="action-btn btn-view" title="Просмотр">
+                            <i class="fa-regular fa-eye"></i>
+                        </a>
+                        <a href="{% url 'crm:deal_update' deal.pk %}" class="action-btn btn-edit" title="Редактировать">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <!-- Кнопка удаления (только для админа) -->
+                        {% if user.role == 'ADMIN' %}
+                        <a href="{% url 'crm:deal_delete' deal.pk %}" class="action-btn btn-delete" title="Удалить">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-white-50">
+                        <i class="fa-solid fa-box-open fa-3x mb-3"></i><br>
+                        Сделок пока нет. Самое время создать первую!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Пагинация (Стилизуем под неон) -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link bg-dark border-secondary text-white" href="?page={{ page_obj.previous_page_number }}">← Назад</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link" style="background: #00d2ff; border-color: #00d2ff;">{{ page_obj.number }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link bg-dark border-secondary text-white" href="?page={{ page_obj.next_page_number }}">Вперед →</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

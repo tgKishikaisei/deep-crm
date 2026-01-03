@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Deep CRM{% endblock %}
+
+{% block content %}
+<!-- 1. HERO SECTION (Заголовок с анимацией) -->
+<div class="container text-center" style="margin-top: 8vh; margin-bottom: 5vh;">
+    <!-- Анимированный заголовок -->
+    <h1 class="display-3 fw-bold mb-3">
+        Deep CRM: <span style="color: #00d2ff;" id="typed-text"></span>
+    </h1>
+    <p class="lead text-white-50 mb-5" style="max-width: 600px; margin: 0 auto;">
+        Управляйте клиентами, сделками и задачами в единой экосистеме.
+        Красиво. Быстро. Эффективно.
+    </p>
+
+    {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-lg"
+           style="background: linear-gradient(45deg, #00d2ff, #3a7bd5); border: none;">
+           Начать бесплатно <i class="fa-solid fa-rocket ms-2"></i>
+        </a>
+    {% endif %}
+</div>
+
+<!-- 2. СЛАЙДЕР (Меню навигации) -->
+<div class="container mb-5">
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+            <!-- Слайд: Дашборд -->
+            <div class="swiper-slide">
+                <a href="{% url 'crm:dashboard' %}" class="stretched-link"></a>
+                <div class="h-100 d-flex justify-content-center align-items-center" style="font-size: 5rem; color: #00d2ff;">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-title">Дашборд</div>
+                    <div class="slide-desc">Вся аналитика на одном экране.</div>
+                </div>
+            </div>
+            <!-- Слайд: Сделки -->
+            <div class="swiper-slide">
+                <a href="{% url 'crm:deal_list' %}" class="stretched-link"></a>
+                <div class="h-100 d-flex justify-content-center align-items-center" style="font-size: 5rem; color: #2ecc71;">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-title">Сделки</div>
+                    <div class="slide-desc">Ведите сделки к успеху.</div>
+                </div>
+            </div>
+            <!-- Слайд: Воронка -->
+            <div class="swiper-slide">
+                <a href="{% url 'crm:kanban' %}" class="stretched-link"></a>
+                <div class="h-100 d-flex justify-content-center align-items-center" style="font-size: 5rem; color: #e74c3c;">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-title">Воронка</div>
+                    <div class="slide-desc">Визуальный канбан для продаж.</div>
+                </div>
+            </div>
+             <!-- Слайд: Клиенты -->
+             <div class="swiper-slide">
+                <a href="{% url 'crm:client_list' %}" class="stretched-link"></a>
+                <div class="h-100 d-flex justify-content-center align-items-center" style="font-size: 5rem; color: #f1c40f;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="slide-content">
+                    <div class="slide-title">Клиенты</div>
+                    <div class="slide-desc">База контактов под рукой.</div>
+                </div>
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
+</div>
+
+<!-- 3. СЕКЦИЯ "ПРЕИМУЩЕСТВА" (Grid Layout) -->
+<div class="container my-5">
+    <h2 class="text-center fw-bold mb-5"><span style="color: #00d2ff;">Почему</span> выбирают нас?</h2>
+    <div class="row g-4">
+
+        <!-- Карточка 1: Скорость -->
+        <div class="col-md-4">
+            <div class="video-card feature-card text-center overflow-hidden position-relative">
+                <!-- Видео фон -->
+                <video autoplay muted loop playsinline class="card-video-bg">
+                    <source src="https://www.pexels.com/download/video/4990233/" type="video/mp4">
+                </video>
+                <div class="card-overlay"></div>
+
+                <div class="position-relative z-2">
+                    <i class="fa-solid fa-bolt feature-icon text-white"></i>
+                    <h4 class="text-white">Скорость работы</h4>
+                    <p class="text-white-50">Мгновенный отклик интерфейса.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка 2: Безопасность -->
+        <div class="col-md-4">
+            <div class="video-card feature-card text-center overflow-hidden position-relative">
+                <video autoplay muted loop playsinline class="card-video-bg">
+                    <source src="https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4" type="video/mp4">
+                </video>
+                <div class="card-overlay"></div>
+
+                <div class="position-relative z-2">
+                    <i class="fa-solid fa-shield-halved feature-icon text-white"></i>
+                    <h4 class="text-white">Безопасность</h4>
+                    <p class="text-white-50">Шифрование уровня Enterprise.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточка 3: Удобство -->
+        <div class="col-md-4">
+            <div class="video-card feature-card text-center overflow-hidden position-relative">
+                <video autoplay muted loop playsinline class="card-video-bg">
+                     <source src="https://www.pexels.com/download/video/9783695/" type="video/mp4">
+                </video>
+                <div class="card-overlay"></div>
+
+                <div class="position-relative z-2">
+                    <i class="fa-solid fa-wand-magic-sparkles feature-icon text-white"></i>
+                    <h4 class="text-white">Удобство</h4>
+                    <p class="text-white-50">Дизайн будущего Glassmorphism.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Стили для Видео-карточек */
+        .video-card {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-video-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.4; /* Полупрозрачное видео */
+            transition: 0.5s;
+        }
+
+        .video-card:hover .card-video-bg {
+            opacity: 0.8; /* При наведении видео становится ярче */
+            transform: scale(1.1); /* И чуть приближается */
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+    </style>
+</div>
+
+<!-- 4. СЕКЦИЯ FAQ (Как на скриншоте) -->
+<div class="container my-5" style="max-width: 800px;">
+    <h2 class="text-center fw-bold mb-4">Частые <span style="color: #00d2ff;">вопросы</span></h2>
+
+    <div class="accordion accordion-glass" id="faqAccordion">
+        <!-- Вопрос 1 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                    <i class="fa-solid fa-question-circle me-2"></i> Что такое Deep CRM?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body text-white-50">
+                    Это современная система управления взаимоотношениями с клиентами, разработанная для малого и среднего бизнеса.
+                </div>
+            </div>
+        </div>
+        <!-- Вопрос 2 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                    <i class="fa-solid fa-lock me-2"></i> Безопасны ли мои данные?
+                </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body text-white-50">
+                    Да. Мы используем передовые методы шифрования Django. Каждый менеджер видит только свои сделки (если не настроено иначе).
+                </div>
+            </div>
+        </div>
+        <!-- Вопрос 3 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                    <i class="fa-solid fa-mobile-screen me-2"></i> Работает ли CRM на телефоне?
+                </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                <div class="accordion-body text-white-50">
+                    Абсолютно! Весь интерфейс, включая графики и воронку продаж, полностью адаптирован под мобильные устройства.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. ФУТЕР -->
+<footer class="footer-glass text-center">
+    <div class="container">
+        <h3 class="fw-bold text-white mb-3">Deep CRM</h3>
+        <p class="mb-4">Создано для бизнеса будущего.</p>
+        <div class="mb-4">
+            <a href="#" class="mx-2"><i class="fa-brands fa-telegram fa-2x"></i></a>
+            <a href="#" class="mx-2"><i class="fa-brands fa-youtube fa-2x"></i></a>
+            <a href="#" class="mx-2"><i class="fa-brands fa-instagram fa-2x"></i></a>
+        </div>
+        <small class="text-muted">&copy; 2025 Deep CRM. Все права защищены.</small>
+    </div>
+</footer>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Подключаем библиотеку для печатающегося текста -->
+<script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+
+<script>
+    // 1. Анимация текста в заголовке
+    var typed = new Typed('#typed-text', {
+        strings: ['Управление Продажами', 'Аналитика', 'Рост Бизнеса', 'Ваш Успех'],
+        typeSpeed: 50,
+        backSpeed: 30,
+        backDelay: 2000,
+        loop: true,
+        showCursor: true
+    });
+
+    // 2. Настройки Слайдера
+    var swiper = new Swiper(".mySwiper", {
+        effect: "coverflow",
+        grabCursor: true,
+        centeredSlides: true,
+        slidesPerView: "auto",
+        coverflowEffect: {
+            rotate: 40,
+            stretch: 0,
+            depth: 100,
+            modifier: 1,
+            slideShadows: true,
+        },
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+        },
+        autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+        },
+    });
+</script>
+{% endblock %}

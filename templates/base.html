@@ -1,0 +1,346 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Deep CRM{% endblock %}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome (Иконки) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Swiper CSS (Для слайдера) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+    <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+
+    <!-- Наш CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+
+</head>
+<body>
+    <div class="scroll-progress"></div>
+    <!-- Глобальный поиск (Скрыт по умолчанию) -->
+    <div id="search-overlay" class="d-none">
+        <div class="search-container glass-panel p-4">
+            <div class="d-flex align-items-center border-bottom border-secondary pb-3 mb-3">
+                <i class="fa-solid fa-magnifying-glass fs-4 text-info me-3"></i>
+                <input type="text" id="global-search-input" class="form-control bg-transparent border-0 text-white fs-4 shadow-none" placeholder="Поиск (Клиенты, Сделки)...">
+                <span class="badge bg-dark border border-secondary text-muted">ESC</span>
+            </div>
+            <div class="search-results text-white-50">
+                <p class="small">Начните вводить текст для поиска...</p>
+                <!-- Сюда можно будет подключить реальный AJAX поиск позже -->
+            </div>
+        </div>
+    </div>
+
+    <div id="preloader">
+        <div class="loader-content">
+            <div class="spinner-grow text-primary" role="status"></div>
+            <div class="spinner-grow text-info" role="status"></div>
+            <div class="spinner-grow text-light" role="status"></div>
+            <h3 class="mt-3 fw-bold text-white">Deep CRM</h3>
+        </div>
+    </div>
+    <!-- ФОН (Волны) -->
+    <div id="vanta-bg"></div>
+
+    <!-- КНОПКА МЕНЮ (CSS переместит её влево) -->
+    <button class="btn btn-menu" type="button" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <!-- БОКОВОЕ МЕНЮ (offcanvas-start = слева) -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sideMenu">
+
+        <!-- Заголовок меню -->
+        <div class="offcanvas-header">
+            <h2 class="offcanvas-title fw-bold" style="color: #00d2ff;">Deep CRM</h2>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+
+        <!-- Тело меню -->
+        <div class="offcanvas-body">
+            <nav class="nav flex-column">
+                <a class="nav-link-custom" href="{% url 'crm:home' %}">🏠 Главная</a>
+                <a class="nav-link-custom" href="{% url 'crm:dashboard' %}">📊 Дашборд</a>
+                <a class="nav-link-custom" href="{% url 'crm:deal_list' %}">💼 Сделки</a>
+                <a class="nav-link-custom" href="{% url 'crm:client_list' %}">👥 Клиенты</a>
+                <a class="nav-link-custom" href="{% url 'crm:kanban' %}">📈 Воронка</a>
+                <a class="nav-link-custom" href="{% url 'crm:calendar' %}">📅 Календарь</a>
+                <a class="nav-link-custom" href="{% url 'crm:about' %}">🚀 О нас</a>
+                <a class="nav-link-custom text-white" href="{% url 'crm:vision' %}">🔮 Видение</a>
+                <a class="nav-link-custom text-warning" href="{% url 'crm:motivation' %}">🔥 Мотивация</a>
+                <a class="nav-link-custom" href="{% url 'crm:leaderboard' %}">🏆 Топ Менеджеров</a>
+                <a class="nav-link-custom text-info" href="{% url 'crm:lab' %}">🧪 Cyber Lab</a>
+                <a href="{% url 'crm:profile' %}" class="text-decoration-none text-white">
+                    <div class="d-flex align-items-center mb-3 p-2 rounded hover-effect">
+                        <!-- ... -->
+                        <h5 class="mb-0">{{ user.username }} (Профиль)</h5>
+                        <!-- ... -->
+                    </div>
+                </a>
+
+                <hr class="border-secondary my-4">
+
+                {% if user.is_authenticated %}
+                    <!-- Инфо о пользователе -->
+                    <a href="{% url 'crm:profile' %}" class="text-decoration-none text-white">
+                        <div class="d-flex align-items-center mb-3 p-2 rounded hover-effect">
+                            <div class="ms-2">
+                                <h5 class="mb-0">{{ user.username }}</h5>
+                                <small class="text-muted">{{ user.get_role_display }}</small>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- 1. КНОПКА ПОМОЩЬ (Вставляем сюда) -->
+                    <!-- Я добавил класс w-100 и mb-2, чтобы она была на всю ширину и с отступом -->
+                    <button onclick="startTour()" class="btn btn-outline-info w-100 mb-2">
+                        <i class="fa-solid fa-circle-question me-2"></i> Обучение
+                    </button>
+
+                    <!-- 2. КНОПКА ВЫЙТИ -->
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Выйти
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary w-100">Войти</a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="container-fluid py-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+    <!-- Анимация Фона -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.waves.min.js"></script>
+
+    <script>
+        // Запуск волн
+        VANTA.WAVES({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x0a0a14,      /* Очень темный цвет */
+            shininess: 40.00,     /* Блеск */
+            waveHeight: 15.00,    /* Высота волны */
+            waveSpeed: 0.5,       /* Медленное движение */
+            zoom: 0.65            /* Отдаление */
+        })
+    </script>
+    <!-- SweetAlert2 (Красивые уведомления) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Настройка стиля уведомлений (Toast)
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: 'rgba(20, 30, 48, 0.9)', // Темный фон
+            color: '#fff', // Белый текст
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Если Django передает сообщения, показываем их
+        {% if messages %}
+            {% for message in messages %}
+                Toast.fire({
+                    icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
+                    title: "{{ message }}"
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+
+    <!-- 3D Tilt Effect -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+    <script>
+        // Инициализация эффекта для всех стеклянных панелей и карточек
+        VanillaTilt.init(document.querySelectorAll(".glass-panel, .card, .kanban-card"), {
+            max: 10,            /* Максимальный угол наклона */
+            speed: 400,         /* Скорость анимации */
+            glare: true,        /* Эффект блика (света) */
+            "max-glare": 0.3,   /* Сила блика */
+            scale: 1.02         /* Легкое увеличение при наведении */
+        });
+    </script>
+
+    <!-- Confetti Effect -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+
+    <script>
+    // Когда страница полностью загрузилась
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('preloader');
+        // Даем небольшую задержку, чтобы анимация успела прогрузиться
+        setTimeout(() => {
+            preloader.classList.add('preloader-hidden');
+        }, 800); // 0.8 секунды
+    });
+    </script>
+    {% block extra_js %}
+    <script>
+        // 1. Открытие/Закрытие окна (как и было)
+        const overlay = document.getElementById('search-overlay');
+        const input = document.getElementById('global-search-input');
+        const resultsContainer = document.querySelector('.search-results');
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                toggleSearch();
+            }
+            if (e.key === 'Escape') closeSearch();
+        });
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) closeSearch();
+        });
+
+        function toggleSearch() {
+            if (overlay.classList.contains('d-none')) {
+                overlay.classList.remove('d-none');
+                input.focus();
+            } else {
+                closeSearch();
+            }
+        }
+
+        function closeSearch() {
+            overlay.classList.add('d-none');
+            input.value = ''; // Очистить поле
+            resultsContainer.innerHTML = '<p class="small text-white-50">Начните вводить текст...</p>';
+        }
+
+        // 2. ЖИВОЙ ПОИСК (AJAX)
+        let timeout = null;
+
+        input.addEventListener('input', function(e) {
+            clearTimeout(timeout);
+            const query = e.target.value.trim();
+
+            // Если пусто - очищаем результаты
+            if (query.length < 2) {
+                resultsContainer.innerHTML = '<p class="small text-white-50">Введите минимум 2 символа...</p>';
+                return;
+            }
+
+            // Задержка 300мс, чтобы не спамить запросами при каждом нажатии
+            timeout = setTimeout(() => {
+                fetch(`{% url 'crm:global_search' %}?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderResults(data.results);
+                    })
+                    .catch(error => console.error('Ошибка поиска:', error));
+            }, 300);
+        });
+
+        // 3. Отрисовка результатов
+        function renderResults(results) {
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-white-50">Ничего не найдено 😔</p>';
+                return;
+            }
+
+            let html = '<div class="list-group list-group-flush rounded">';
+
+            results.forEach(item => {
+                // Выбираем иконку в зависимости от типа
+                let icon = item.type === 'client' ? '<i class="fa-regular fa-building text-warning"></i>' : '<i class="fa-solid fa-briefcase text-success"></i>';
+                let typeName = item.type === 'client' ? 'Клиент' : 'Сделка';
+
+                html += `
+                    <a href="${item.url}" class="list-group-item list-group-item-action bg-transparent text-white border-bottom border-secondary d-flex align-items-center py-3">
+                        <div class="fs-4 me-3">${icon}</div>
+                        <div>
+                            <div class="fw-bold text-info">${item.title}</div>
+                            <small class="text-white-50">${typeName}: ${item.desc}</small>
+                        </div>
+                        <i class="fa-solid fa-chevron-right ms-auto text-white-50"></i>
+                    </a>
+                `;
+            });
+
+            html += '</div>';
+            resultsContainer.innerHTML = html;
+        }
+    </script>
+
+    <!-- AOS Animation JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800, /* Длительность анимации */
+        once: true,    /* Анимация проигрывается 1 раз */
+        offset: 100    /* Начинать анимацию заранее */
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+
+    <script>
+    const driver = window.driver.js.driver;
+
+    const driverObj = driver({
+        showProgress: true,
+        steps: [
+            { element: '.navbar-brand', popover: { title: 'Добро пожаловать', description: 'Это ваша новая CRM система Deep CRM.' } },
+            { element: '.btn-menu', popover: { title: 'Меню', description: 'Здесь находится навигация по всем разделам.' } },
+            { element: 'main', popover: { title: 'Рабочая область', description: 'Здесь отображаются ваши сделки, клиенты и графики.' } }
+        ]
+    });
+
+    function startTour() {
+        // Закрыть боковое меню, если открыто
+        const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('sideMenu'));
+        if(offcanvas) offcanvas.hide();
+
+        driverObj.drive();
+    }
+    </script>
+
+    <script>
+    window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.querySelector('.scroll-progress').style.width = scrolled + "%";
+    });
+    </script>
+
+    {% endblock %}
+</body>
+</html>

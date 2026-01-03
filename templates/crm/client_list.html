@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Список клиентов{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+
+    <!-- 1. ЗАГОЛОВОК И КНОПКА -->
+    <div class="d-flex align-items-center justify-content-between mb-4 mt-4 ps-5">
+        <div>
+            <h1 class="fw-bold text-white mb-0" style="text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);">
+                Клиенты
+            </h1>
+            <p class="text-white-50">База ваших контактов</p>
+        </div>
+        <a href="{% url 'crm:client_create' %}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-lg" 
+           style="background: linear-gradient(45deg, #00d2ff, #0072ff); border: none;">
+            <i class="fa-solid fa-user-plus me-2"></i> Новый клиент
+        </a>
+    </div>
+
+    <!-- 2. СТЕКЛЯННЫЙ ФИЛЬТР -->
+    <div class="card glass-panel border-0 mb-5 animate-fade-in">
+        <div class="card-body p-4">
+            <h5 class="card-title text-info mb-3"><i class="fa-solid fa-filter me-2"></i>Поиск и фильтры</h5>
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    
+                    {% for field in filter.form %}
+                        <div class="col-md-3">
+                            <label for="{{ field.id_for_label }}" class="form-label text-white-50 small fw-bold">
+                                {{ field.label }}
+                            </label>
+                            <!-- Поля ввода автоматически станут темными благодаря нашему CSS -->
+                            {% render_field field class="form-control" %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="col-md-auto">
+                        <button type="submit" class="btn btn-outline-info w-100">
+                            <i class="fa-solid fa-magnifying-glass"></i> Найти
+                        </button>
+                    </div>
+                    <div class="col-md-auto">
+                        <a href="{% url 'crm:client_list' %}" class="btn btn-outline-secondary w-100" title="Сбросить">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. ТАБЛИЦА КЛИЕНТОВ -->
+    <div class="table-responsive">
+        <table class="table table-glass align-middle">
+            <thead>
+                <tr>
+                    <th>Компания</th>
+                    <th>Контактное лицо</th>
+                    <th>Контакты</th> <!-- Объединим Email и Телефон для компактности -->
+                    <th>Дата создания</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <!-- Анимация появления строк -->
+                <tr class="animate-row" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                    
+                    <!-- Компания -->
+                    <td>
+                        <div class="fw-bold fs-5 text-white">{{ client.company_name }}</div>
+                        {% if client.manager %}
+                            <small class="text-white-50">
+                                <i class="fa-solid fa-user-tie me-1"></i> {{ client.manager.username }}
+                            </small>
+                        {% endif %}
+                    </td>
+
+                    <!-- Контактное лицо -->
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-secondary d-flex justify-content-center align-items-center me-2 text-white" 
+                                 style="width: 35px; height: 35px; font-weight: bold;">
+                                {{ client.contact_person|slice:":1"|upper }}
+                            </div>
+                            <span class="text-white">{{ client.contact_person }}</span>
+                        </div>
+                    </td>
+
+                    <!-- Контакты (Email + Телефон) -->
+                    <td>
+                        <div class="d-flex flex-column">
+                            <a href="mailto:{{ client.email }}" class="text-decoration-none text-info mb-1" style="font-size: 0.9rem;">
+                                <i class="fa-regular fa-envelope me-2"></i> {{ client.email }}
+                            </a>
+                            <a href="tel:{{ client.phone }}" class="text-decoration-none text-white-50" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-phone me-2 text-success"></i> {{ client.phone }}
+                            </a>
+                        </div>
+                    </td>
+
+                    <!-- Дата -->
+                    <td>
+                        <span class="badge bg-dark border border-secondary text-white-50 fw-normal">
+                            {{ client.created_at|date:"d.m.Y" }}
+                        </span>
+                    </td>
+
+                    <!-- Действия -->
+                    <td class="text-end">
+                        <a href="{% url 'crm:client_detail' client.pk %}" class="action-btn btn-view" title="Карточка клиента">
+                            <i class="fa-regular fa-address-card"></i>
+                        </a>
+                        <a href="{% url 'crm:client_update' client.pk %}" class="action-btn btn-edit" title="Редактировать">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-white-50">
+                        <i class="fa-solid fa-users-slash fa-3x mb-3 opacity-50"></i><br>
+                        Клиентов не найдено.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 4. ПАГИНАЦИЯ -->
+    {% if is_paginated %}
+    <nav class="mt-4 pb-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link bg-dark border-secondary text-white" 
+                       href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">← Назад</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link" style="background: #00d2ff; border-color: #00d2ff;">{{ page_obj.number }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link bg-dark border-secondary text-white" 
+                       href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Вперед →</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+
+<style>
+    /* Локальная анимация для фильтра */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

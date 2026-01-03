@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block title %}Cyber Lab - UI Experiments{% endblock %}
+
+{% block content %}
+<!-- 1. PAGE TRANSITION (Анимация появления этой страницы) -->
+<div class="lab-container animate-page-in">
+
+    <!-- СЕКЦИЯ 1: 3D SPLINE + HACKER TEXT -->
+    <div class="row align-items-center mb-5" style="min-height: 60vh;">
+        <div class="col-md-6">
+            <small class="text-info text-uppercase ls-2">Future UI Interface</small>
+            <!-- 2. HACKER TEXT EFFECT -->
+            <h1 class="display-1 fw-bold hacker-text mb-4" style="font-family: monospace;">CYBER LAB</h1>
+            <p class="lead text-white-50 mb-5">
+                Экспериментальный отсек. Здесь мы тестируем передовые технологии интерфейсов:
+                3D-моделирование, скелетную загрузку и магнитную физику.
+            </p>
+            
+            <!-- 5. MAGNETIC BUTTON -->
+            <button class="btn btn-outline-info btn-lg rounded-pill px-5 py-3 magnetic-btn">
+                <i class="fa-solid fa-flask me-2"></i> ЗАПУСТИТЬ ТЕСТ
+            </button>
+        </div>
+        
+        <div class="col-md-6 h-100 position-relative">
+            <!-- 4. SPLINE 3D (Вставлена демо-сцена с роботом/абстракцией) -->
+            <div class="spline-wrapper">
+               <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.28/build/spline-viewer.js"></script>
+                <spline-viewer
+                        url="https://prod.spline.design/sVurPPayPqmI8O1U/scene.splinecode"
+                        background="transparent">
+                </spline-viewer>
+            </div>
+        </div>
+
+    <!-- СЕКЦИЯ 2: SKELETON LOADING -->
+    <div class="row g-4">
+        <h3 class="text-white mb-4 border-bottom border-secondary pb-2">Симуляция загрузки данных</h3>
+        
+        <!-- Три карточки с "Загрузкой" -->
+        {% for i in "123" %}
+        <div class="col-md-4">
+            <div class="card glass-panel border-0 p-4 h-100">
+                
+                <!-- SKELETON STATE (Видим сначала) -->
+                <div class="skeleton-wrapper" id="skeleton-{{ forloop.counter }}">
+                    <div class="skeleton skeleton-img mb-3"></div>
+                    <div class="skeleton skeleton-title mb-2"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text w-75"></div>
+                </div>
+
+                <!-- REAL CONTENT (Скрыт, появится через 3 сек) -->
+                <div class="real-content d-none" id="content-{{ forloop.counter }}">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fa-solid fa-database fs-2 text-primary me-3"></i>
+                        <h4 class="mb-0 text-white">Data Node {{ forloop.counter }}</h4>
+                    </div>
+                    <p class="text-white-50">Данные успешно загружены с удаленного сервера. Система работает стабильно.</p>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success">Online</span>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="row mt-5" id="magic-container">
+    <h3 class="text-white mb-4">Magic Hover Effect (Двигай мышкой)</h3>
+
+    <!-- Карточка 1 -->
+    <div class="col-md-4">
+        <div class="magic-card">
+            <div class="magic-content">
+                <i class="fa-solid fa-server fs-2 text-info mb-3"></i>
+                <h4 class="text-white">Server Node</h4>
+                <p class="text-white-50">Наведите курсор, чтобы увидеть эффект прожектора на границах.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка 2 -->
+    <div class="col-md-4">
+        <div class="magic-card">
+            <div class="magic-content">
+                <i class="fa-solid fa-microchip fs-2 text-warning mb-3"></i>
+                <h4 class="text-white">AI Processor</h4>
+                <p class="text-white-50">Эффект следует за вашей мышью, подсвечивая соседние элементы.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка 3 -->
+    <div class="col-md-4">
+        <div class="magic-card">
+            <div class="magic-content">
+                <i class="fa-solid fa-globe fs-2 text-success mb-3"></i>
+                <h4 class="text-white">Global Net</h4>
+                <p class="text-white-50">Выглядит очень технологично и дорого. Используется на сайте Linear.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- СТИЛИ ТОЛЬКО ДЛЯ ЭТОЙ СТРАНИЦЫ -->
+<style>
+    /* 1. Page Transition */
+    .animate-page-in {
+        animation: pageSlideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    @keyframes pageSlideUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Spline Wrapper */
+    .spline-wrapper {
+        height: 500px;
+        width: 100%;
+        background: transparent;
+    }
+
+    /* 3. Skeleton Loading CSS */
+    .skeleton {
+        background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite linear;
+        border-radius: 8px;
+    }
+    .skeleton-img { height: 60px; width: 60px; border-radius: 50%; }
+    .skeleton-title { height: 24px; width: 60%; }
+    .skeleton-text { height: 16px; width: 100%; margin-bottom: 8px; }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Hacker Text Color */
+    .dud { color: #00d2ff; opacity: 0.7; }
+    spline-viewer {
+    background: transparent !important;
+    }
+    /* Добавь это в блок <style> */
+    .hacker-text {
+        font-family: 'Courier New', Courier, monospace; /* Обязательно моноширинный шрифт */
+        color: #00d2ff;
+        font-weight: bold;
+    }
+
+    /* Ограничивающий контейнер */
+    .spline-wrapper {
+        height: 500px;
+        width: 100%;
+        overflow: hidden; /* Обрезаем всё, что вылезает за рамки */
+        position: relative;
+        border-radius: 15px; /* Скругляем углы контейнера */
+    }
+
+    /* Сама 3D модель */
+    spline-viewer {
+        width: 100%;
+        /* Делаем высоту больше 100%, чтобы низ ушел за границу */
+        height: 125% !important;
+        /* Подтягиваем верх, чтобы модель осталась по центру, а низ обрезался */
+        margin-top: -5%;
+        display: block;
+        /* Убираем фон (на всякий случай) */
+        background: transparent !important;
+    }
+    /* Контейнер для карточек */
+    .magic-grid {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .magic-card {
+        background-color: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        cursor: pointer;
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    /* Волшебная подсветка */
+    .magic-card::before {
+        content: "";
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0; left: 0;
+        background: radial-gradient(
+            800px circle at var(--mouse-x) var(--mouse-y),
+            rgba(255, 255, 255, 0.1),
+            transparent 40%
+        );
+        opacity: 0;
+        transition: opacity 0.5s;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* Рамка, которая светится */
+    .magic-card::after {
+        content: "";
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0; left: 0;
+        background: radial-gradient(
+            600px circle at var(--mouse-x) var(--mouse-y),
+            rgba(0, 210, 255, 0.4),
+            transparent 40%
+        );
+        opacity: 0;
+        z-index: 1;
+        transition: opacity 0.5s;
+        border-radius: inherit;
+    }
+
+    .magic-card:hover::before,
+    .magic-card:hover::after {
+        opacity: 1;
+    }
+
+    /* Контент поверх свечения */
+    .magic-content {
+        position: relative;
+        z-index: 3;
+        background-color: rgba(20, 20, 30, 0.95); /* Темный фон внутри, чтобы светилась только рамка */
+        height: calc(100% - 2px);
+        width: calc(100% - 2px);
+        margin: 1px;
+        border-radius: inherit;
+        padding: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- 1. HACKER TEXT SCRAMBLE (Исправленный) ---
+    class TextScramble {
+        constructor(el) {
+            this.el = el;
+            this.chars = '!<>-_\\/[]{}—=+*^?#________';
+            this.update = this.update.bind(this);
+        }
+        setText(newText) {
+            const oldText = this.el.innerText;
+            const length = Math.max(oldText.length, newText.length);
+            const promise = new Promise((resolve) => this.resolve = resolve);
+            this.queue = [];
+            for (let i = 0; i < length; i++) {
+                const from = oldText[i] || '';
+                const to = newText[i] || '';
+                const start = Math.floor(Math.random() * 40);
+                const end = start + Math.floor(Math.random() * 40);
+                this.queue.push({ from, to, start, end });
+            }
+            cancelAnimationFrame(this.frameRequest);
+            this.frame = 0;
+            this.update();
+            return promise;
+        }
+        update() {
+            let output = '';
+            let complete = 0;
+            for (let i = 0, n = this.queue.length; i < n; i++) {
+                let { from, to, start, end, char } = this.queue[i];
+                if (this.frame >= end) {
+                    complete++;
+                    output += to;
+                } else if (this.frame >= start) {
+                    if (!char || Math.random() < 0.28) {
+                        char = this.chars[Math.floor(Math.random() * this.chars.length)];
+                        this.queue[i].char = char;
+                    }
+                    output += `<span class="dud" style="color: #555;">${char}</span>`;
+                } else {
+                    output += from;
+                }
+            }
+            this.el.innerHTML = output;
+            if (complete === this.queue.length) {
+                this.resolve();
+            } else {
+                this.frameRequest = requestAnimationFrame(this.update);
+                this.frame++;
+            }
+        }
+    }
+
+    // Запускаем Hacker Text
+    document.addEventListener('DOMContentLoaded', () => {
+        const el = document.querySelector('.hacker-text');
+        if (el) {
+            const fx = new TextScramble(el);
+            fx.setText('CYBER LAB'); // Старт
+
+            // Эффект при наведении
+            el.addEventListener('mouseenter', () => {
+                fx.setText('SYSTEM_CHECK...');
+                setTimeout(() => fx.setText('CYBER LAB'), 1500);
+            });
+        }
+    });
+
+    // --- 2. MAGNETIC BUTTON (Магнитная кнопка) ---
+    const btn = document.querySelector('.magnetic-btn');
+    if (btn) {
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = `translate(0px, 0px)`;
+        });
+    }
+
+    // --- 3. SKELETON LOADING (Симуляция загрузки) ---
+    // ВОТ ЭТОГО КУСКА НЕ ХВАТАЛО, ПОЭТОМУ ЗАГРУЗКА НЕ ОСТАНАВЛИВАЛАСЬ
+    setTimeout(() => {
+        for (let i = 1; i <= 3; i++) {
+            const skeleton = document.getElementById(`skeleton-${i}`);
+            const content = document.getElementById(`content-${i}`);
+
+            if (skeleton && content) {
+                skeleton.classList.add('d-none'); // Скрываем скелет
+                content.classList.remove('d-none'); // Показываем контент
+                // Анимация появления
+                content.style.animation = "pageSlideUp 0.5s ease forwards";
+            }
+        }
+    }, 3000); // Таймер на 3 секунды
+</script>
+
+<script>
+    // Магия слежения за мышкой
+    document.getElementById("magic-container").onmousemove = e => {
+        for(const card of document.getElementsByClassName("magic-card")) {
+            const rect = card.getBoundingClientRect(),
+                  x = e.clientX - rect.left,
+                  y = e.clientY - rect.top;
+
+            card.style.setProperty("--mouse-x", `${x}px`);
+            card.style.setProperty("--mouse-y", `${y}px`);
+        }
+    };
+</script>
+{% endblock %}

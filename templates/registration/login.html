@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="container h-100">
+    <div class="row justify-content-center align-items-center" style="height: 80vh;">
+        <div class="col-md-4">
+            <!-- Используем класс glass-panel из нашего CSS -->
+            <div class="glass-panel p-5 text-center">
+                <h1 class="mb-4 fw-bold">Deep CRM</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-4 text-start">
+                        <label class="form-label text-white-50 small">Логин</label>
+                        {% render_field form.username class="form-control" placeholder="username" %}
+                    </div>
+
+                    <div class="mb-4 text-start">
+                        <label class="form-label text-white-50 small">Пароль</label>
+                        {% render_field form.password class="form-control" placeholder="••••••••" %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" style="background: linear-gradient(45deg, #00d2ff, #3a7bd5); border: none;">Войти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

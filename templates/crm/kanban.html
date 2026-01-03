@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Воронка продаж{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4" style="margin-top: 3vh; height: 85vh;">
+
+    <!-- Заголовок -->
+    <div class="d-flex align-items-center mb-4 ps-2">
+        <h1 class="fw-bold text-white mb-0" style="text-shadow: 0 0 20px rgba(0,210,255,0.5);">
+            Воронка продаж
+        </h1>
+    </div>
+
+    <!-- Контейнер колонок -->
+    <div class="row h-100 g-4">
+
+        <!-- 1. НОВЫЕ (Синий) -->
+        <div class="col-md-3 h-100">
+            <div class="kanban-col glass-panel h-100 d-flex flex-column" style="border-top: 4px solid #0d6efd;">
+                <div class="p-3 border-bottom border-secondary bg-dark bg-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-primary mb-0"><i class="fa-solid fa-star me-2"></i>Новые</h5>
+                    <span class="badge bg-primary rounded-pill">{{ deals_new.count }}</span>
+                </div>
+                <div class="kanban-body p-3 overflow-auto custom-scroll">
+                    {% for deal in deals_new %}
+                        {% include 'crm/_kanban_card.html' %}
+                    {% empty %}
+                        <div class="text-center text-white-50 mt-5 opacity-50">
+                            <i class="fa-regular fa-folder-open fa-2x mb-2"></i>
+                            <p>Нет сделок</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. В РАБОТЕ (Желтый) -->
+        <div class="col-md-3 h-100">
+            <div class="kanban-col glass-panel h-100 d-flex flex-column" style="border-top: 4px solid #ffc107;">
+                <div class="p-3 border-bottom border-secondary bg-dark bg-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-warning mb-0"><i class="fa-solid fa-spinner me-2"></i>В работе</h5>
+                    <span class="badge bg-warning text-dark rounded-pill">{{ deals_progress.count }}</span>
+                </div>
+                <div class="kanban-body p-3 overflow-auto custom-scroll">
+                    {% for deal in deals_progress %}
+                        {% include 'crm/_kanban_card.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. УСПЕШНО (Зеленый) -->
+        <div class="col-md-3 h-100">
+            <div class="kanban-col glass-panel h-100 d-flex flex-column" style="border-top: 4px solid #198754;">
+                <div class="p-3 border-bottom border-secondary bg-dark bg-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-success mb-0"><i class="fa-solid fa-check-circle me-2"></i>Успех</h5>
+                    <span class="badge bg-success rounded-pill">{{ deals_won.count }}</span>
+                </div>
+                <div class="kanban-body p-3 overflow-auto custom-scroll">
+                    {% for deal in deals_won %}
+                        {% include 'crm/_kanban_card.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ПРОВАЛ (Красный) -->
+        <div class="col-md-3 h-100">
+            <div class="kanban-col glass-panel h-100 d-flex flex-column" style="border-top: 4px solid #dc3545;">
+                <div class="p-3 border-bottom border-secondary bg-dark bg-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-danger mb-0"><i class="fa-solid fa-ban me-2"></i>Провал</h5>
+                    <span class="badge bg-danger rounded-pill">{{ deals_lost.count }}</span>
+                </div>
+                <div class="kanban-body p-3 overflow-auto custom-scroll">
+                    {% for deal in deals_lost %}
+                        {% include 'crm/_kanban_card.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
