@@ -1,9 +1,4 @@
 
-code
-Markdown
-download
-content_copy
-expand_less
 # 🚀 Deep CRM — Система управления продажами (Fullstack)
 
 ![Project Status](https://img.shields.io/badge/Status-Completed-success)
