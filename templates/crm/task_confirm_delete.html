@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление задачи{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card glass-panel border-0 mx-auto" style="max-width: 640px;">
+        <div class="card-body p-4 text-white">
+            <h1 class="h3 fw-bold mb-3">Удалить задачу «{{ object.title }}»?</h1>
+            <p class="text-white-50">Сделка: {{ object.deal.title }}. Это действие нельзя будет отменить.</p>
+            <form method="post" class="d-flex gap-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Да, удалить</button>
+                <a href="{% url 'crm:deal_detail' object.deal_id %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

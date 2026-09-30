@@ -1,47 +1,51 @@
-
 from rest_framework import viewsets
-from .models import Client, Deal, Task
-from .serializers import ClientSerializer, DealSerializer, TaskSerializer
-from .permissions import IsOwnerOrAdmin
 from rest_framework.permissions import IsAuthenticated
 
-# API для Клиентов
+from .access import clients_for, deals_for, is_crm_admin, tasks_for
+from .permissions import IsOwnerOrAdmin
+from .serializers import ClientSerializer, DealSerializer, TaskSerializer
+
+
 class ClientViewSet(viewsets.ModelViewSet):
+    """Клиенты: менеджер видит и меняет только своих (чужой id → 404)."""
     serializer_class = ClientSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get_queryset(self):
-        # Middle-уровень фильтруем данные, чтобы менеджер видел только своих
-        user = self.request.user
-        if user.role == 'ADMIN':
-            return Client.objects.all()
-        return Client.objects.filter(manager=user)
+        return clients_for(self.request.user).order_by('-created_at')
 
     def perform_create(self, serializer):
-        # Автоматически назначаем менеджера при создании через API
-        serializer.save(menager=self.request.user)
+        serializer.save(manager=self.request.user)
+
+    def perform_destroy(self, instance):
+        # Удаление клиента (каскадом со сделками) — только админ, как и в веб-интерфейсе.
+        if not is_crm_admin(self.request.user):
+            self.permission_denied(self.request, message='Удалять клиентов может только администратор.')
+        instance.delete()
 
 
-# API для Сделок
 class DealViewSet(viewsets.ModelViewSet):
     serializer_class = DealSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get_queryset(self):
-        user = self.request.user
-        if user.role == 'ADMIN':
-            return Deal.objects.select_related('client').all()
-        return Deal.objects.select_related('client').filter(manager=user)
+        return deals_for(self.request.user).order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(manager=self.request.user)
 
+    def perform_destroy(self, instance):
+        if not is_crm_admin(self.request.user):
+            self.permission_denied(self.request, message='Удалять сделки может только администратор.')
+        instance.delete()
 
-# API для Задач
+
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Task.objects.filter(assignee=self.request.user)
+        return tasks_for(self.request.user).order_by('due_date')
 
     def perform_create(self, serializer):
         serializer.save(assignee=self.request.user)

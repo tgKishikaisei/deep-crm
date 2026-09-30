@@ -114,7 +114,7 @@
     .magnetic-btn { transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 </style>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // --- МАГИЯ СКРОЛЛА ---
     
     // Находим все секции и все видео

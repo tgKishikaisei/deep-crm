@@ -1,201 +1,143 @@
-import json
-
-from django.shortcuts import render
-
-# Create your views here.
-
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy, reverse
-from django.db.models import Sum, Count, Q
-from django.utils import timezone
 from datetime import timedelta
-from django.views.generic.base import TemplateView
-from django.views.generic import TemplateView as Templateview
-from django.http import JsonResponse
-from django.views import View
-from django.shortcuts import get_object_or_404
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.cache import cache
+from django.db import transaction
+from django.db.models import F, Q, Sum
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.views import View
+from django.views.decorators.http import require_GET
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic.base import TemplateView
 
-from .models import Deal, Client, Task
-from .filters import ClientFilter
-
+from core.middleware import allow_eval_csp
 from users.models import User
 
+from .access import clients_for, deals_for, is_crm_admin, tasks_for
+from .filters import ClientFilter
+from .models import Client, Deal, Task
 from .tasks import send_congrats_email
 
-class HomeView(Templateview):
+
+def dashboard_cache_key(user_id) -> str:
+    return f"dashboard_stats_{user_id}"
+
+
+class HomeView(TemplateView):
     template_name = 'home.html'
 
 
-# Миксин для проверки, является ли пользователь администратором
+# Миксин для проверки, является ли пользователь администратором.
+# Не-админу отвечаем 404, а не 403: не подтверждаем, что такой раздел существует.
 class AdminRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.role == 'ADMIN'
+        return is_crm_admin(self.request.user)
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        raise Http404
+
+
+class DealClientFieldMixin:
+    """В выпадающем списке клиентов — только клиенты текущего менеджера.
+
+    Иначе менеджер мог бы привязать свою сделку к чужому клиенту и увидеть
+    его данные на странице сделки.
+    """
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['client'].queryset = clients_for(self.request.user)
+        return form
 
 
 class DealListView(LoginRequiredMixin, ListView):
-    """
-    Представление для отображения списка сделок
-    Доступна всем авторизованным пользователям
-    """
-    model = Deal
-    template_name = 'crm/deal_list.html'  # Указываем путь к нашему будущему шаблон
-    context_object_name = 'deals'  # Имя, по которому будем обрашаться к списку в шаблоне
-    paginate_by = 10  # Добавляем пагинацию, по 10 сделок на страницу
+    """Список сделок: админ видит все, менеджер — только свои."""
+    template_name = 'crm/deal_list.html'
+    context_object_name = 'deals'
+    paginate_by = 10
 
     def get_queryset(self):
-        """
-        Переопределяем метод для фильтрации сделок
-        Админ видит все сделки, менеджер - только свои
-        """
-        user = self.request.user
-        queryset = super().get_queryset().select_related('client', 'manager')  # Оптимизация запроса!
-
-        if user.role == 'MANAGER':
-            return queryset.filter(manager=user)
-        return queryset
+        return deals_for(self.request.user)
 
 
 class DealDetailView(LoginRequiredMixin, DetailView):
-    """
-    Детальное представление сделки
-    Менеджер может видеть только свою сделку
-    """
-    model = Deal
+    """Детальное представление сделки: чужая сделка → 404."""
     template_name = 'crm/deal_detail.html'
     context_object_name = 'deal'
 
     def get_queryset(self):
-        user = self.request.user
-
-        # МАГИЯ ЗДЕСЬ: select_related
-        # Мы говорим: "Сделай JOIN таблиц client и manager сразу"
-        queryset = super().get_queryset().select_related('client', 'manager')
-
-        if user.role == 'MANAGER':
-            queryset = queryset.filter(manager=user)
-
-        # ... фильтры ...
-        # self.filterset = DealFilter(self.request.GET, queryset=queryset)
-        return queryset
+        return deals_for(self.request.user)
 
 
-class DealCreateView(LoginRequiredMixin, CreateView):
-    """
-    Представление для создания новой сделки
-    """
-    model = Deal
-    template_name = 'crm/deal_form.html'
-    fields = ['client', 'title', 'amount', 'stage']  # Поля, которую будут в форме
-    success_url = reverse_lazy('crm:deal_list')  # Куда перенаправить после успеха
-
-    def form_valid(self, form):
-        """
-        Переопределяем метод, чтобы автоматически назначить
-        текущего пользователя менеджером сделки
-        """
-
-        form.instance.manager = self.request.user
-        return super().form_valid(form)
-
-
-class DealUpdateView(LoginRequiredMixin, UpdateView):
-    """
-    Представление для редактирования сделки
-    Менеджер может редактировать только свои сделки
-    """
+class DealCreateView(LoginRequiredMixin, DealClientFieldMixin, CreateView):
+    """Создание сделки: менеджером автоматически становится текущий пользователь."""
     model = Deal
     template_name = 'crm/deal_form.html'
     fields = ['client', 'title', 'amount', 'stage']
     success_url = reverse_lazy('crm:deal_list')
 
-    def get_queryset(self):
-        """
-        Безопасность! Убеждаемся, что менеджер не может
-        отредактировать чужую сделку, просто подставим ID в URL
-        """
-        user = self.request.user
-        queryset = super().get_queryset()
+    def form_valid(self, form):
+        form.instance.manager = self.request.user
+        return super().form_valid(form)
 
-        if user.role == 'MANAGER':
-            return queryset.filter(manager=user)
-        return queryset
+
+class DealUpdateView(LoginRequiredMixin, DealClientFieldMixin, UpdateView):
+    """Редактирование сделки: менеджер может редактировать только свои сделки."""
+    template_name = 'crm/deal_form.html'
+    fields = ['client', 'title', 'amount', 'stage']
+    success_url = reverse_lazy('crm:deal_list')
+
+    def get_queryset(self):
+        return deals_for(self.request.user)
 
     def form_valid(self, form):
-        # Сначала сохраняем изменения
+        was_won = Deal.objects.filter(pk=form.instance.pk, stage=Deal.Stage.WON).exists()
         response = super().form_valid(form)
 
-        # Проверяем, стала ли стадия WON (Успех)
-        if form.instance.stage == 'WON':
-            # ЗАПУСКАЕМ ФОНОВУЮ ЗАДАЧУ
-            # Используем .delay() - это магия Celery
-            # Мы передаем только строки (email, название), а не объекты базы!
-            send_congrats_email.delay(form.instance.client.email, form.instance.title)
+        # Письмо уходит только при переходе в WON и только после коммита транзакции.
+        if form.instance.stage == Deal.Stage.WON and not was_won:
+            email, title = form.instance.client.email, form.instance.title
+            transaction.on_commit(lambda: send_congrats_email.delay(email, title))
 
         return response
-class DealDeleteView(LoginRequiredMixin, DetailView):
-    """
-    Представление для удаления сделки
-    Доступно только администратору
-    """
+
+
+class DealDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+    """Удаление сделки — только администратор."""
     model = Deal
     template_name = 'crm/deal_confirm_delete.html'
     success_url = reverse_lazy('crm:deal_list')
 
-    def get_queryset(self):
-        """
-        Доступ на удаление имеет только админ
-        """
-        user = self.request.user
-        if user.role == 'ADMIN':
-            return super().get_queryset()
-        # Возвращаем пустой queryset, если не админ, что приведет к 404
-        return self.model.objects.none()
-
 
 class ClientListView(LoginRequiredMixin, ListView):
-    model = Client
     template_name = 'crm/client_list.html'
     context_object_name = 'clients'
     paginate_by = 10
 
     def get_queryset(self):
-        user = self.request.user
-        # Сначала получаем базовый queryset
-        queryset = super().get_queryset().select_related('manager')
-
-        # Если пользователь - менеджер, фильтруем по нему
-        if user.role == 'MANAGER':
-            queryset = queryset.filter(manager=user)
-
-        # 1. СОЗДАЕМ АТРИБУТ self.filterset
-        # Эта строка ОБЯЗАТЕЛЬНА, чтобы следующий метод мог работать
+        queryset = clients_for(self.request.user).select_related('manager')
+        # self.filterset нужен get_context_data, чтобы отрисовать форму фильтра.
         self.filterset = ClientFilter(self.request.GET, queryset=queryset)
-
-        # Возвращаем отфильтрованный queryset для отображения в таблице
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
-        # 2. ИСПОЛЬЗУЕМ АТРИБУТ self.filterset
-        # Этот метод вызывается ПОСЛЕ get_queryset, поэтому self.filterset уже существует
         context = super().get_context_data(**kwargs)
-        # Передаем объект фильтра в контекст, чтобы отобразить форму в шаблоне
         context['filter'] = self.filterset
         return context
 
 
 class ClientDetailView(LoginRequiredMixin, DetailView):
-    model = Client
     template_name = 'crm/client_detail.html'
     context_object_name = 'client'
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = super().get_queryset()
-        if user.role == 'MANAGER':
-            return queryset.filter(manager=user)
-        return queryset
+        return clients_for(self.request.user)
 
 
 class ClientCreateView(LoginRequiredMixin, CreateView):
@@ -210,37 +152,19 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
 
 
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
-    model = Client
     template_name = 'crm/client_form.html'
     fields = ['company_name', 'contact_person', 'email', 'phone']
     success_url = reverse_lazy('crm:client_list')
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = super().get_queryset()
-        if user.role == 'MANAGER':
-            return queryset.filter(manager=user)
-        return queryset
+        return clients_for(self.request.user)
 
 
 class ClientDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
-    """
-    Представление для удаления клиента
-    Доступна только для администратора благодаря (AdminRequiredMixin)
-    """
+    """Удаление клиента — только администратор."""
     model = Client
     template_name = 'crm/client_confirm_delete.html'
     success_url = reverse_lazy('crm:client_list')
-
-    def get_queryset(self):
-        """
-        Допольнительно убеждаемся, что только админ может получить доступ
-        Хотя AdminRequiredMixin уже делает проверку, это хорошая практика
-        Для зашиты на уровне данных
-        """
-        if self.request.user.role == 'ADMIN':
-            return super().get_queryset()
-        return self.model.objects.none()
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -250,126 +174,43 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # --- 2. ПРОВЕРКА КЭША ---
-        # Создаем уникальный ключ для каждого пользователя
-        # (чтобы Manager1 не увидел данные Manager2)
-        cache_key = f"dashboard_stats_{user.id}"
-
-        # Пытаемся достать данные из Redis
+        # Кэш на пользователя (Manager1 не увидит данные Manager2).
+        # Сбрасывается сигналами при изменении сделок, клиентов и задач (crm/signals.py).
+        cache_key = dashboard_cache_key(user.id)
         cached_data = cache.get(cache_key)
-
         if cached_data:
-            # Если данные есть в кэше — просто добавляем их в контекст и выходим!
-            # База данных не тревожится.
-            print("⚡ Данные загружены из Redis")  # Для проверки в консоли
             context.update(cached_data)
             return context
 
-        # --- 3. ЕСЛИ КЭША НЕТ — СЧИТАЕМ (Твой старый код) ---
-        print("🐢 Считаем данные из Базы Данных...")
-
         user_deals = Deal.objects.filter(manager=user)
         user_clients = Client.objects.filter(manager=user)
-
-        # Собираем все тяжелые данные в словарь 'data'
         data = {}
 
-        # Карточка Активные сделки
-        active_deals = user_deals.filter(stage__in=['NEW', 'IN_PROGRESS'])
+        active_deals = user_deals.filter(stage__in=[Deal.Stage.NEW, Deal.Stage.IN_PROGRESS])
         data['active_deals_count'] = active_deals.count()
+        data['active_deals_total_amount'] = active_deals.aggregate(total=Sum('amount'))['total'] or 0
 
-        # Карточка Сумма
-        total_amount_dict = active_deals.aggregate(total=Sum('amount'))
-        data['active_deals_total_amount'] = total_amount_dict['total'] or 0
-
-        # Карточка Новые клиенты
         one_month_ago = timezone.now() - timedelta(days=30)
         data['new_clients_count'] = user_clients.filter(created_at__gte=one_month_ago).count()
 
-        # Список последних сделок
-        # ВАЖНО: Оборачиваем в list(), чтобы выполнить запрос к БД сейчас и сохранить результат,
-        # иначе в кэш попадет "ленивый" запрос, который не сработает потом.
-        data['latest_deals'] = list(user_deals.order_by('-created_at')[:5])
+        # list(): в кэш должен попасть результат, а не «ленивый» QuerySet.
+        data['latest_deals'] = list(user_deals.select_related('client').order_by('-created_at')[:5])
 
-        # Графики
-        count_new = user_deals.filter(stage='NEW').count()
-        count_progress = user_deals.filter(stage='IN_PROGRESS').count()
-        count_won = user_deals.filter(stage='WON').count()
-        count_lost = user_deals.filter(stage='LOST').count()
+        # Данные графиков передаются в шаблон через json_script (без |safe).
+        stages = [Deal.Stage.NEW, Deal.Stage.IN_PROGRESS, Deal.Stage.WON, Deal.Stage.LOST]
+        data['chart_stages_data'] = [user_deals.filter(stage=s).count() for s in stages]
 
-        data['chart_stages_data'] = json.dumps([count_new, count_progress, count_won, count_lost])
+        last_deals = list(user_deals.order_by('-created_at')[:7])[::-1]
+        data['chart_titles'] = [deal.title for deal in last_deals]
+        data['chart_amounts'] = [float(deal.amount) for deal in last_deals]
 
-        last_deals = user_deals.order_by('-created_at')[:7]
-        deal_titles = [deal.title for deal in last_deals]
-        deal_amounts = [float(deal.amount) for deal in last_deals]
+        data['upcoming_tasks'] = list(
+            Task.objects.filter(assignee=user, status=Task.Status.PENDING).order_by('due_date')[:5]
+        )
 
-        data['chart_titles'] = json.dumps(deal_titles[::-1])
-        data['chart_amounts'] = json.dumps(deal_amounts[::-1])
-
-        # Задачи (тоже list)
-        data['upcoming_tasks'] = list(Task.objects.filter(assignee=user, status='PENDING').order_by('due_date')[:5])
-
-        # --- 4. СОХРАНЯЕМ В КЭШ ---
-        # Сохраняем словарь 'data' в Redis на 300 секунд (5 минут)
         cache.set(cache_key, data, 300)
-
-        # Обновляем контекст страницы
         context.update(data)
-
         return context
-# class DashboardView(LoginRequiredMixin, TemplateView):
-#     template_name = 'crm/dashboard.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         user = self.request.user
-#
-#         # Определяем базовый Queryset для сделок и клиентов текущего пользователя
-#         user_deals = Deal.objects.filter(manager=user)
-#         user_clients = Client.objects.filter(manager=user)
-#
-#         # Карточка Активные сделки
-#         active_deals = user_deals.filter(stage__in=['NEW', 'IN_PROGRESS'])
-#         context['active_deals_count'] = active_deals.count()
-#
-#         # Карточка Сумма активных сделок
-#         # .aggregate() возвращает словарь Мы получаем из него значение по ключу
-#         total_amount_dict = active_deals.aggregate(total=Sum('amount'))
-#         context['active_deals_total_amount'] = total_amount_dict['total'] or 0  # or 0 на случай если сделок нет
-#
-#         # Карточка Новые клиенты за 30 дней
-#         one_month_ago = timezone.now() - timedelta(days=30)
-#         context['new_clients_count'] = user_clients.filter(created_at__gte=one_month_ago).count()
-#
-#         # Список последних 5 сделок
-#         context['latest_deals'] = user_deals.order_by('-created_at')[:5]
-#
-#         # Данные для Круговой диограммы (По стадии)
-#         # Считаем количество сделок в каждой стадии
-#         count_new = user_deals.filter(stage='NEW').count()
-#         count_progress = user_deals.filter(stage='IN_PROGRESS').count()
-#         count_won = user_deals.filter(stage='WON').count()
-#         count_lost = user_deals.filter(stage='LOST').count()
-#
-#         # Передаем как список
-#         context['chart_stages_data'] = json.dumps([count_new, count_progress, count_won, count_lost])
-#
-#         # Данные для Графика (Последние 5 сделок по сумме)
-#         # Возьмем последние 5 сделок и покажем их суммы
-#         last_deals = user_deals.order_by('-created_at')[:7]
-#
-#         # Название сделок (для оси X)
-#         deal_titles = [deal.title for deal in last_deals]
-#
-#         # Суммы (для оси Y)
-#         deal_amounts = [float(deal.amount) for deal in last_deals]  # float нужен для JSON
-#
-#         # Разворачиваем список, чтобы старые были слева (для графика красивая)
-#         context['chart_titles'] = json.dumps(deal_titles[::-1])
-#         context['chart_amounts'] = json.dumps(deal_amounts[::-1])
-#         # TODO: Добавить логику для задач, когда они будут реализованы
-#         context['upcoming_tasks'] = Task.objects.filter(assignee=user, status='PENDING').order_by('due_date')[:5]
-#         return context
 
 
 class KanbanView(LoginRequiredMixin, TemplateView):
@@ -377,17 +218,12 @@ class KanbanView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-
-        # Получаем сделки менеджера
-        deals = Deal.objects.filter(manager=user)
-
-        # Разбираем из по стадиям для колонок
-        context['deals_new'] = deals.filter(stage='NEW')
-        context['deals_progress'] = deals.filter(stage='IN_PROGRESS')
-        context['deals_won'] = deals.filter(stage='WON')
-        context['deals_lost'] = deals.filter(stage='LOST')
-
+        # Личная доска: только сделки текущего пользователя.
+        deals = Deal.objects.filter(manager=self.request.user).select_related('client')
+        context['deals_new'] = deals.filter(stage=Deal.Stage.NEW)
+        context['deals_progress'] = deals.filter(stage=Deal.Stage.IN_PROGRESS)
+        context['deals_won'] = deals.filter(stage=Deal.Stage.WON)
+        context['deals_lost'] = deals.filter(stage=Deal.Stage.LOST)
         return context
 
 
@@ -396,149 +232,141 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
 
 class GlobalSearchView(LoginRequiredMixin, View):
+    """Поиск по клиентам и сделкам — только в пределах данных пользователя."""
+
     def get(self, request):
-        query = request.GET.get('q', '')
+        query = request.GET.get('q', '').strip()[:100]
         results = []
 
-        if query:
-            # 1. Ищем Клиентов
-            clients = Client.objects.filter(
-                Q(company_name__icontains=query) |
-                Q(contact_person__icontains=query) |
-                Q(email__icontains=query)
+        if len(query) >= 2:
+            clients = clients_for(request.user).filter(
+                Q(company_name__icontains=query)
+                | Q(contact_person__icontains=query)
+                | Q(email__icontains=query)
             )[:5]
-
             for client in clients:
                 results.append({
                     'type': 'client',
                     'title': client.company_name,
-                    'desc': str(client.contact_person), # Превращаем в строку на всякий случай
-                    'url': str(reverse('crm:client_detail', kwargs={'pk': client.pk})) # <-- ВАЖНО: str(reverse(...))
+                    'desc': str(client.contact_person),
+                    'url': reverse('crm:client_detail', kwargs={'pk': client.pk}),
                 })
 
-            # 2. Ищем Сделки
-            deals = Deal.objects.filter(
-                Q(title__icontains=query)
-            )[:5]
-
-            for deal in deals:
+            for deal in deals_for(request.user).filter(title__icontains=query)[:5]:
                 results.append({
                     'type': 'deal',
                     'title': deal.title,
                     'desc': f"{deal.amount} ₽",
-                    'url': str(reverse('crm:deal_detail', kwargs={'pk': deal.pk})) # <-- ВАЖНО
+                    'url': reverse('crm:deal_detail', kwargs={'pk': deal.pk}),
                 })
 
         return JsonResponse({'results': results})
 
 
-# Страница календаря
 class CalendarView(LoginRequiredMixin, TemplateView):
     template_name = 'crm/calendar.html'
 
 
-# Api которые отдает события (Сделки и Задачи)
+@require_GET
+@login_required
 def calendar_events(request):
+    """События календаря (сделки и задачи), только для вошедших пользователей."""
     user = request.user
     events = []
 
-    # Добавляем Сделки (по дате создании)
-    deals = Deal.objects.filter(manager=user)
-    for deal in deals:
+    for deal in Deal.objects.filter(manager=user).only('pk', 'title', 'created_at', 'stage'):
         events.append({
             'title': f"💰 {deal.title}",
             'start': deal.created_at.strftime('%Y-%m-%d'),
-            'url': str(reverse_lazy('crm:deal_detail', kwargs={'pk': deal.pk})),
-            'color': '#2ecc71' if deal.stage == 'WON' else '#00d2ff',  # Зеленый если успех, иначе синий
-            'className': 'fc-event-glass'  # Наш класс для стиля
+            'url': reverse('crm:deal_detail', kwargs={'pk': deal.pk}),
+            'color': '#2ecc71' if deal.stage == Deal.Stage.WON else '#00d2ff',
+            'className': 'fc-event-glass',
         })
 
-        # 2. ЗАДАЧИ (Теперь добавляем их)
-    tasks = Task.objects.filter(assignee=user)
-    for task in tasks:
-        # Цвет зависит от статуса: Серый если готово, Желтый если ждет
-        color = '#6c757d' if task.status == 'COMPLETED' else '#f1c40f'
-
+    for task in Task.objects.filter(assignee=user).only('title', 'due_date', 'status', 'deal_id'):
         events.append({
             'title': f"📌 {task.title}",
-            'start': task.due_date.strftime('%Y-%m-%d'),  # Берем только дату
-            'url': str(reverse_lazy('crm:deal_detail', kwargs={'pk': task.deal.pk})),  # Ведем на сделку
-            'color': color,
-            'className': 'fc-event-glass'
+            'start': task.due_date.strftime('%Y-%m-%d'),
+            'url': reverse('crm:deal_detail', kwargs={'pk': task.deal_id}),
+            'color': '#6c757d' if task.status == Task.Status.COMPLETED else '#f1c40f',
+            'className': 'fc-event-glass',
         })
 
     return JsonResponse(events, safe=False)
 
 
-# Список всех задач (To do List)
 class TaskListView(LoginRequiredMixin, ListView):
-    model = Task
+    """Список задач пользователя, сначала срочные."""
     template_name = 'crm/task_list.html'
     context_object_name = 'tasks'
     paginate_by = 10
 
     def get_queryset(self):
-        # Показываем задачи только текущего менеджера, сначала срочные
-        return Task.objects.filter(assignee=self.request.user).order_by('due_date')
+        return tasks_for(self.request.user).order_by('due_date')
 
-# СОЗДАНИЕ ЗАДАЧИ (Привязана к сделке)
+
 class TaskCreateView(LoginRequiredMixin, CreateView):
+    """Создание задачи в сделке.
+
+    Сделка из URL проверяется на владельца: чужую сделку нельзя дополнить задачей
+    и потом открыть через календарь.
+    """
     model = Task
     template_name = 'crm/task_form.html'
     fields = ['title', 'description', 'due_date', 'status']
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            self.deal = get_object_or_404(deals_for(request.user), pk=kwargs['deal_pk'])
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
-        # Получаем сделку из URL (deal_pk)
-        deal = get_object_or_404(Deal, pk=self.kwargs['deal_pk'])
-        form.instance.deal = deal
-        form.instance.assignee = self.request.user # Назначаем на себя
+        form.instance.deal = self.deal
+        form.instance.assignee = self.request.user
         return super().form_valid(form)
 
     def get_success_url(self):
-        # После создания возвращаемся обратно в сделку
-        return reverse_lazy('crm:deal_detail', kwargs={'pk': self.object.deal.pk})
+        return reverse('crm:deal_detail', kwargs={'pk': self.object.deal_id})
 
-# РЕДАКТИРОВАНИЕ ЗАДАЧИ
+
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
-    model = Task
+    """Редактирование задачи: queryset ограничен задачами пользователя."""
     template_name = 'crm/task_form.html'
     fields = ['title', 'description', 'due_date', 'status']
 
+    def get_queryset(self):
+        return tasks_for(self.request.user)
+
     def get_success_url(self):
-        return reverse_lazy('crm:deal_detail', kwargs={'pk': self.object.deal.pk})
+        return reverse('crm:deal_detail', kwargs={'pk': self.object.deal_id})
 
 
-# УДАЛЕНИЕ ЗАДАЧИ
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
-    model = Task
+    """Удаление задачи: queryset ограничен задачами пользователя."""
     template_name = 'crm/task_confirm_delete.html'
 
+    def get_queryset(self):
+        return tasks_for(self.request.user)
+
     def get_success_url(self):
-        return reverse_lazy('crm:deal_detail', kwargs={'pk': self.object.deal.pk})
+        return reverse('crm:deal_detail', kwargs={'pk': self.object.deal_id})
 
 
 class AboutView(TemplateView):
     template_name = 'about.html'
 
 
-class LeaderboardView(LoginRequiredMixin, Templateview):
+class LeaderboardView(LoginRequiredMixin, TemplateView):
     template_name = 'crm/leaderboard.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # Берем всех пользователей и считаем сумму их УСПЕШНЫХ сделок
-        leaders = User.objects.annotate(
-            total_sales=Sum('deals__amount', filter=Q(deals__stage='WON'))
-        ).order_by('-total_sales')  # Сортируем: у кого больше, тот выше
-
-        # Очищаем от тех, у кого 0 продаж (или None), если хочешь
-        # leaders = [l for l in leaders if l.total_sales]
-
-        # Разделяем: Топ-3 отдельно, остальные отдельно
+        # Сумма УСПЕШНЫХ сделок по активным пользователям.
+        leaders = User.objects.filter(is_active=True).annotate(
+            total_sales=Sum('deals__amount', filter=Q(deals__stage=Deal.Stage.WON))
+        ).order_by(F('total_sales').desc(nulls_last=True), 'username')
         context['top_leaders'] = leaders[:3]
         context['other_leaders'] = leaders[3:]
-
         return context
 
 
@@ -552,3 +380,7 @@ class VisionView(LoginRequiredMixin, TemplateView):
 
 class LabView(LoginRequiredMixin, TemplateView):
     template_name = 'crm/lab.html'
+
+    def get(self, request, *args, **kwargs):
+        # spline-viewer вычисляет код через eval — ослабляем CSP только на этой странице.
+        return allow_eval_csp(super().get(request, *args, **kwargs))

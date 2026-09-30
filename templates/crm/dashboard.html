@@ -93,7 +93,7 @@
                                             </span>
                                         </div>
                                         <span class="fw-bold" style="color: #2ecc71; font-size: 1.1rem;">
-                                            {{ deal.amount|floatformat:0 }} sum
+                                            {{ deal.amount|floatformat:0 }} ₽
                                         </span>
                                     </li>
                                 {% endfor %}
@@ -106,12 +106,17 @@
             </div>
         </div>
     <!-- Подключаем библиотеку ApexCharts -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@7.5.1/dist/apexcharts.min.js" integrity="sha384-gN+rEShSaAd6s+T6Ck1rtql7T35j11+77JmmoGLxQdWb2bJHsFdGYFfo/5CLzbAE" crossorigin="anonymous"></script>
 
-<script>
+{# Данные графиков — через json_script: названия сделок экранируются и не могут закрыть <script nonce="{{ request.csp_nonce }}">. #}
+{{ chart_stages_data|json_script:"chart-stages-data" }}
+{{ chart_amounts|json_script:"chart-amounts" }}
+{{ chart_titles|json_script:"chart-titles" }}
+<script nonce="{{ request.csp_nonce }}">
+    const readJson = (id) => JSON.parse(document.getElementById(id).textContent);
 // --- 1. Настройка Круговой диаграммы (Donut) ---
     var optionsStages = {
-        series: {{ chart_stages_data|safe }},
+        series: readJson('chart-stages-data'),
         chart: {
             type: 'donut',
             height: 300,
@@ -195,7 +200,7 @@
     var optionsAmounts = {
         series: [{
             name: 'Сумма сделки',
-            data: {{ chart_amounts|safe }} // Данные сумм
+            data: readJson('chart-amounts') // Данные сумм
         }],
         chart: {
             type: 'area', // Красивый график с заливкой
@@ -207,7 +212,7 @@
         theme: { mode: 'dark' },
         stroke: { curve: 'smooth' }, // Плавные линии
         xaxis: {
-            categories: {{ chart_titles|safe }}, // Названия сделок
+            categories: readJson('chart-titles'), // Названия сделок
             labels: { style: { colors: '#aaa' } }
         },
         yaxis: {

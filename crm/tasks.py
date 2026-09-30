@@ -1,26 +1,20 @@
-# crm/tasks.py
+import logging
+
 from celery import shared_task
+from django.conf import settings
 from django.core.mail import send_mail
-import time
+
+logger = logging.getLogger(__name__)
 
 
-@shared_task
+@shared_task(autoretry_for=(OSError,), retry_backoff=True, max_retries=3)
 def send_congrats_email(email, deal_title):
-    """
-    Задача отправляет письмо.
-    Мы добавим искусственную задержку (sleep), чтобы ты увидел,
-    что сайт НЕ виснет, пока письмо "отправляется".
-    """
-    print(f"--> НАЧИНАЮ ОТПРАВКУ ПИСЬМА для {email}...")
-
-    # Имитация долгой работы (5 секунд)
-    time.sleep(5)
-
+    """Письмо клиенту о закрытой сделке (фоновая задача Celery)."""
     send_mail(
         subject='Поздравляем с успешной сделкой!',
         message=f'Сделка "{deal_title}" успешно закрыта! Вы - космос! 🚀',
-        from_email='admin@deepcrm.com',
+        from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[email],
     )
-
-    return f"Email sent to {email}"
+    logger.info("Congrats email sent for deal %r", deal_title)
+    return "sent"

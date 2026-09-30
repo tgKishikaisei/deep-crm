@@ -218,12 +218,12 @@
 
 {% block extra_js %}
     {% if deal.stage == 'WON' %}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         // Запускаем салют при загрузке страницы, если сделка успешна
         window.onload = function() {
             var duration = 3 * 1000;
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999, disableForReducedMotion: true };
 
             function randomInOut(min, max) {
               return Math.random() * (max - min) + min;

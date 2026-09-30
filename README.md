@@ -1,182 +1,84 @@
-Это очень крутая задача. Твой README.md — это лицо твоего проекта на GitHub. Рекрутеры и техлиды часто читают только его, не заглядывая в код.
+# Deep CRM
 
-Я составил для тебя идеальный структуру. Это не просто "список файлов", это техническая презентация, которая объясняет, ПОЧЕМУ этот проект крутой и КАК он работает внутри.
+CRM для небольшого отдела продаж. Менеджер ведёт своих клиентов и сделки, ставит задачи с дедлайнами и смотрит воронку на дашборде. Django 5.2, PostgreSQL, Celery и Redis поднимаются одной командой Docker Compose.
 
-Создай файл README.md в корне проекта и вставь туда этот текст.
+[![License](https://img.shields.io/github/license/tgKishikaisei/deep-crm)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/tgKishikaisei/deep-crm/ci.yml?branch=main&label=CI)](https://github.com/tgKishikaisei/deep-crm/actions/workflows/ci.yml)
 
-code
-Markdown
-download
-content_copy
-expand_less
-# 🚀 Deep CRM — Система управления продажами (Fullstack)
+![Дашборд Deep CRM](docs/dashboard.png)
 
-![Project Status](https://img.shields.io/badge/Status-Completed-success)
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-![Django](https://img.shields.io/badge/Django-5.0-green)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![Канбан сделок](docs/kanban.png)
 
-**Deep CRM** — это мощная, современная CRM-система с микросервисной архитектурой, асинхронными задачами и футуристичным UI (Glassmorphism + 3D). 
+## Возможности
 
-Проект разработан как **коммерческий продукт**, решающий проблемы автоматизации продаж, аналитики и планирования.
+- **Клиенты и сделки.** Сделка проходит стадии «Новая», «В работе», «Успешно закрыта», «Не успешно закрыта». Канбан-доска показывает все четыре колонки, история изменений хранится через django-simple-history.
+- **Задачи.** У задачи есть срок и исполнитель; календарь на FullCalendar показывает задачи и сделки на одной сетке.
+- **Дашборд и рейтинг.** Воронка и выручка на ApexCharts, таблица лидеров по сумме выигранных сделок. Цифры кэшируются в Redis, сигнал сбрасывает кэш при любом изменении сделки.
+- **Письмо клиенту.** Когда сделка переходит в «Успешно закрыта», Celery отправляет письмо в фоне, после коммита транзакции.
+- **Поиск по Ctrl+K.** Ищет клиентов и сделки текущего менеджера без перезагрузки страницы.
+- **REST API.** `/api/v1/clients/`, `/api/v1/deals/`, `/api/v1/tasks/` на DRF, Swagger и Redoc для сотрудников.
 
----
+Каждый менеджер видит только свои данные: чужой клиент, сделка или задача отвечают 404 и в интерфейсе, и в API. Подробности в [SECURITY.md](SECURITY.md).
 
-## 📸 Скриншоты и Демонстрация
+## Стек
 
-*(Сюда рекомендую вставить GIF или скриншоты: Дашборд, Канбан, Страница Входа)*
+| Часть | Что используется |
+|---|---|
+| Бэкенд | Django 5.2 LTS, Django REST Framework, Celery, django-axes, django-simple-history |
+| Данные | PostgreSQL 15, Redis 7 (брокер и кэш) |
+| Интерфейс | Django Templates, Bootstrap 5, ApexCharts, FullCalendar, Vanta.js, AOS |
+| Запуск | Docker Compose, gunicorn, whitenoise, пример nginx с TLS в `deploy/nginx.conf` |
+| Проверки | Django test, pip-audit, bandit, gitleaks, `check --deploy` в GitHub Actions |
 
----
+## Запуск через Docker
 
-## 🛠 Технологический Стек (Tech Stack)
-
-### Backend (Инженерная часть)
-*   **Django 5.0:** Основной фреймворк. Используется **Class-Based Views (CBV)** для чистой архитектуры.
-*   **PostgreSQL:** Промышленная реляционная база данных (вместо SQLite).
-*   **Django Rest Framework (DRF):** Полноценное REST API для интеграции с мобильными приложениями.
-*   **Celery + Redis:** Асинхронная очередь задач. Используется для фоновой отправки Email и тяжелых вычислений, чтобы не блокировать интерфейс пользователя.
-*   **Redis Cache:** Кэширование аналитики на Дашборде (снижение нагрузки на БД).
-*   **Django-Debug-Toolbar:** Использовался для оптимизации SQL-запросов (устранение проблемы N+1 с помощью `select_related`).
-
-### Frontend (Визуальная часть)
-*   **Template Engine:** Django Templates.
-*   **UI/UX:** Кастомный дизайн в стиле **Glassmorphism** (полупрозрачные панели, неон) + Bootstrap 5.
-*   **Visual Effects:**
-    *   **Vanta.js:** 3D-анимация фона (Волны/Сеть) на WebGL.
-    *   **Spline 3D:** Интерактивные 3D-модели (Робот/Абстракция).
-    *   **AOS (Animate On Scroll):** Плавное появление элементов при скролле.
-    *   **Vanilla Tilt:** 3D-эффект наклона карточек при наведении.
-    *   **Typed.js:** Эффект печатающейся машинки в заголовках.
-*   **Interactive:**
-    *   **ApexCharts:** Красивые динамические графики (Воронка, Линейный график).
-    *   **FullCalendar:** Интерактивный планировщик задач и сделок.
-    *   **HTMX / Fetch API:** Живой поиск (Spotlight Search) без перезагрузки страницы.
-
-### DevOps & Security
-*   **Docker & Docker Compose:** Полная контейнеризация проекта (Web, DB, Redis, Worker).
-*   **Nginx:** (Подготовлен для продакшена).
-*   **Security:**
-    *   **Django-Axes:** Защита от Brute-force атак (бан после 3 попыток).
-    *   **Admin Honeypot:** Ловушка для хакеров на стандартном URL админки.
-    *   **Throttling:** Защита API от спам-запросов.
-    *   **Python-Decouple:** Скрытие секретных ключей в `.env`.
-
----
-
-## 🧠 Как это работает? (Архитектура)
-
-Здесь описано, как взаимодействуют компоненты системы "под капотом".
-
-### 1. Асинхронность (Celery + Redis)
-**Проблема:** Отправка email клиенту занимает 2-5 секунд. Если делать это в основном потоке, сайт "зависнет" для пользователя.
-**Решение:**
-1.  Пользователь переводит сделку в статус "Успех".
-2.  Django сохраняет сделку и **мгновенно** отправляет задачу в **Redis** (брокер сообщений).
-3.  Пользователь сразу видит обновленную страницу (0.1 сек).
-4.  В фоне процесс **Celery Worker** забирает задачу из Redis и отправляет письмо.
-
-### 2. Оптимизация Базы Данных (ORM)
-**Проблема:** При загрузке списка сделок Django делал 50+ SQL запросов (для каждой сделки отдельно запрашивал имя клиента). Это проблема N+1.
-**Решение:**
-Использован метод `.select_related('client', 'manager')`.
-Теперь Django делает **ОДИН** сложный SQL-запрос с `INNER JOIN`, вытаскивая все данные сразу. Количество запросов упало с 50 до 4.
-
-### 3. Кэширование (Redis)
-**Проблема:** Расчет аналитики на Дашборде (суммы, воронки) нагружает БД.
-**Решение:**
-Результат вычислений сохраняется в **Redis** на 5 минут. При обновлении страницы данные берутся из оперативной памяти Redis мгновенно, не тревожа базу данных.
-
----
-
-## 🚀 Установка и Запуск
-
-Проект полностью упакован в Docker. Вам не нужно устанавливать Python или Postgres локально.
-
-### Шаг 1. Клонирование
 ```bash
-git clone https://github.com/ВАШ_НИК/deep-crm.git
+git clone https://github.com/tgKishikaisei/deep-crm.git
 cd deep-crm
-Шаг 2. Настройка окружения
+cp .env.example .env          # впишите SECRET_KEY, DB_PASSWORD, REDIS_PASSWORD, ALLOWED_HOSTS
+docker compose up -d --build
+docker compose exec web python manage.py createsuperuser
+```
 
-Создайте файл .env в корне проекта:
+Compose поднимает Postgres, Redis с паролем, разовый `migrate`, веб на gunicorn и воркер Celery. Сайт слушает `127.0.0.1:8000`; наружу его выпускает обратный прокси.
 
-code
-Env
-download
-content_copy
-expand_less
-SECRET_KEY=ваш_секретный_ключ
-DEBUG=True
-DB_NAME=crm_db
-DB_USER=postgres
-DB_PASSWORD=secret
-DB_HOST=db
-REDIS_HOST=redis
-Шаг 3. Запуск через Docker
-code
-Bash
-download
-content_copy
-expand_less
-docker-compose up --build
+Для разработки с автоперезагрузкой:
 
-Docker сам скачает образы, установит зависимости и запустит 4 контейнера (Django, Postgres, Redis, Celery).
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
 
-Шаг 4. Миграции и Суперпользователь
+## Запуск без Docker
 
-В новом окне терминала:
+Нужны Python 3.10+, PostgreSQL и Redis.
 
-code
-Bash
-download
-content_copy
-expand_less
-# Применяем миграции
-docker-compose exec web python manage.py migrate
+```bash
+python -m venv venv
+venv\Scripts\activate              # Linux и macOS: source venv/bin/activate
+pip install --require-hashes -r requirements.txt -r requirements-dev.txt
+cp .env.example .env                # DB_HOST=127.0.0.1, REDIS_URL=redis://:пароль@127.0.0.1:6379
+python manage.py migrate
+python manage.py runserver
+```
 
-# Создаем админа
-docker-compose exec web python manage.py createsuperuser
+Воркер Celery запускается отдельно, на Windows с `--pool=solo`:
 
-Готово! Сайт доступен по адресу: http://127.0.0.1:8000/
+```bash
+celery -A crm_project worker -l info --pool=solo
+```
 
-🧪 Тестирование
+## Тесты
 
-Проект покрыт базовыми Unit-тестами.
-Для запуска тестов внутри контейнера:
+```bash
+python manage.py test --settings=crm_project.settings.test
+```
 
-code
-Bash
-download
-content_copy
-expand_less
-docker-compose exec web python manage.py test
-📚 API Документация (Swagger)
+Тестовые настройки используют SQLite в памяти и локальный кэш, поэтому Postgres и Redis для тестов не нужны.
 
-Проект имеет встроенную документацию для фронтенд-разработчиков.
-После запуска перейдите по адресу:
-http://127.0.0.1:8000/swagger/
+## Живая версия
 
-👨‍💻 Автор
+Публичного стенда нет, проект запускается локально по инструкции выше.
 
-[KIEE] — Fullstack Python Developer.
+## Лицензия
 
-
-Проект создан с целью демонстрации навыков разработки High-End веб-приложений.
-
-code
-Code
-download
-content_copy
-expand_less
----
-
-### Как это объяснять на собеседовании (для тебя)
-
-Этот README служит тебе шпаргалкой. Если спросят: **"А что ты там использовал?"**, ты не просто перечисляешь названия, а говоришь сценариями:
-
-1.  *"Я использовал **Celery**, чтобы сайт не вис при отправке писем. Пользователь не должен ждать."*
-2.  *"Я использовал **Redis** не только как брокер, но и как кэш для аналитики, чтобы снизить нагрузку на **PostgreSQL**."*
-3.  *"Я внедрил **Docker**, чтобы исключить проблему 'на моем компьютере работает, а на сервере нет'."*
-4.  *"Фронтенд сделал на **Django Templates**, но добавил много реактивности через **JS** и **AJAX**, чтобы это ощущалось как современное SPA приложение."*
-
-Это ответ уровня Middle. Удачи! 🚀
+[MIT](LICENSE) © 2026 Behruz Avezmatov

@@ -7,11 +7,11 @@
     <title>{% block title %}Deep CRM{% endblock %}</title>
 
     <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" rel="stylesheet">
     <!-- Font Awesome (Иконки) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     <!-- Swiper CSS (Для слайдера) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10.3.1/swiper-bundle.min.css" integrity="sha384-WDy11dc+3v52BOTt9WHuWenX6bjqGVBwYrU4XtgPIrneMtg1bXhpmWEZECSNrasO" crossorigin="anonymous" />
 
     <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
 
@@ -19,8 +19,8 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
     <!-- AOS Animation CSS -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" integrity="sha384-/rJKQnzOkEo+daG0jMjU1IwwY9unxt1NBw3Ef2fmOJ3PW/TfAg2KXVoWwMZQZtw9" crossorigin="anonymous" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" integrity="sha384-bovbcpDBo0pTIhd7ws6ebPh1PG31ubAHcX2pv8Tcu5EtFHNl5FBciYFtS/e2SN66" crossorigin="anonymous"/>
 
 </head>
 <body>
@@ -102,7 +102,7 @@
 
                     <!-- 1. КНОПКА ПОМОЩЬ (Вставляем сюда) -->
                     <!-- Я добавил класс w-100 и mb-2, чтобы она была на всю ширину и с отступом -->
-                    <button onclick="startTour()" class="btn btn-outline-info w-100 mb-2">
+                    <button type="button" id="start-tour-btn" class="btn btn-outline-info w-100 mb-2">
                         <i class="fa-solid fa-circle-question me-2"></i> Обучение
                     </button>
 
@@ -127,16 +127,18 @@
     </main>
 
     <!-- SCRIPTS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10.3.1/swiper-bundle.min.js" integrity="sha384-UpSTlZpLDzenAXs6CRRa5gU7uk1xaEJy+7uIz+c0niFDR3yuAlqzV7w0SgZhmEX3" crossorigin="anonymous"></script>
 
     <!-- Анимация Фона -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.waves.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" integrity="sha384-9EQoUIJYrv09/oYhSxnw1VpLcfPw3BM9dE7+D/3wGUPeLLa7F9Z6OAoD+i/M6FK9" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.waves.min.js" integrity="sha384-fs5VqUnBAfynHwt9bbuBxdgqyNG/vUAEV0bbNR1WkKlgIJLlK+jPRNHPNcpKUkKg" crossorigin="anonymous"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
+        // Пользователь попросил ОС уменьшить движение — тяжёлые эффекты не запускаем.
+        window.REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         // Запуск волн
-        VANTA.WAVES({
+        if (!window.REDUCED_MOTION) VANTA.WAVES({
             el: "#vanta-bg",
             mouseControls: true,
             touchControls: true,
@@ -153,9 +155,9 @@
         })
     </script>
     <!-- SweetAlert2 (Красивые уведомления) -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.25/dist/sweetalert2.all.min.js" integrity="sha384-nLoOnA/BDh8A/jxqtckg4DumuCGOBYUnNJLZdQz/zfYNp3wcjGSoWTAzgko06G/2" crossorigin="anonymous"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         // Настройка стиля уведомлений (Toast)
         const Toast = Swal.mixin({
             toast: true,
@@ -176,17 +178,20 @@
             {% for message in messages %}
                 Toast.fire({
                     icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
-                    title: "{{ message }}"
+                    // titleText — только текст (title в SweetAlert2 вставляется как HTML).
+                    titleText: "{{ message|escapejs }}"
                 });
             {% endfor %}
         {% endif %}
     </script>
 
     <!-- 3D Tilt Effect -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js" integrity="sha384-QQEAefmew0Un2GyadO5GSPVijOMu9zSE/p+OM1WgLr8sQp9f5ZXokako48B7Ytiw" crossorigin="anonymous"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         // Инициализация эффекта для всех стеклянных панелей и карточек
+        // Наклон карточек — только для мыши и без reduced-motion (на тач-экранах мешает прокрутке).
+        if (!window.REDUCED_MOTION && window.matchMedia('(hover: hover)').matches)
         VanillaTilt.init(document.querySelectorAll(".glass-panel, .card, .kanban-card"), {
             max: 10,            /* Максимальный угол наклона */
             speed: 400,         /* Скорость анимации */
@@ -197,10 +202,10 @@
     </script>
 
     <!-- Confetti Effect -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" integrity="sha384-HAH79XdRvHr6axVGh4xQWVCp14kcd32bNk4Xu0sHDHtFQ42n6BAM8ykvB47dGz6D" crossorigin="anonymous"></script>
 
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     // Когда страница полностью загрузилась
     window.addEventListener('load', function() {
         const preloader = document.getElementById('preloader');
@@ -211,7 +216,7 @@
     });
     </script>
     {% block extra_js %}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         // 1. Открытие/Закрытие окна (как и было)
         const overlay = document.getElementById('search-overlay');
         const input = document.getElementById('global-search-input');
@@ -268,6 +273,14 @@
             }, 300);
         });
 
+        // Экранирование данных из API перед вставкой в HTML: название компании
+        // или сделки может содержать разметку вроде <img onerror=...>.
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"'`]/g, (ch) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;',
+            }[ch]));
+        }
+
         // 3. Отрисовка результатов
         function renderResults(results) {
             if (results.length === 0) {
@@ -283,11 +296,11 @@
                 let typeName = item.type === 'client' ? 'Клиент' : 'Сделка';
 
                 html += `
-                    <a href="${item.url}" class="list-group-item list-group-item-action bg-transparent text-white border-bottom border-secondary d-flex align-items-center py-3">
+                    <a href="${escapeHtml(item.url)}" class="list-group-item list-group-item-action bg-transparent text-white border-bottom border-secondary d-flex align-items-center py-3">
                         <div class="fs-4 me-3">${icon}</div>
                         <div>
-                            <div class="fw-bold text-info">${item.title}</div>
-                            <small class="text-white-50">${typeName}: ${item.desc}</small>
+                            <div class="fw-bold text-info">${escapeHtml(item.title)}</div>
+                            <small class="text-white-50">${typeName}: ${escapeHtml(item.desc)}</small>
                         </div>
                         <i class="fa-solid fa-chevron-right ms-auto text-white-50"></i>
                     </a>
@@ -300,18 +313,19 @@
     </script>
 
     <!-- AOS Animation JS -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" integrity="sha384-wziAfh6b/qT+3LrqebF9WeK4+J5sehS6FA10J1t3a866kJ/fvU5UwofWnQyzLtwu" crossorigin="anonymous"></script>
+    <script nonce="{{ request.csp_nonce }}">
       AOS.init({
+        disable: () => window.REDUCED_MOTION, /* Без анимаций появления при reduced-motion */
         duration: 800, /* Длительность анимации */
         once: true,    /* Анимация проигрывается 1 раз */
         offset: 100    /* Начинать анимацию заранее */
       });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js" integrity="sha384-yPK823YWGKpXfBT8wLqUXmrB5ejcI7sgGBIary/01UavNc1bD92AOUBCBzjXQS/s" crossorigin="anonymous"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     const driver = window.driver.js.driver;
 
     const driverObj = driver({
@@ -330,9 +344,11 @@
 
         driverObj.drive();
     }
+    // Обработчик вешается из скрипта: inline onclick заблокирован строгой CSP (nonce).
+    document.getElementById('start-tour-btn')?.addEventListener('click', startTour);
     </script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     window.addEventListener('scroll', () => {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;

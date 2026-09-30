@@ -1,20 +1,16 @@
-
 from rest_framework import permissions
+
+from .access import is_crm_admin
 
 
 class IsOwnerOrAdmin(permissions.BasePermission):
-    """
-    Разрешает доступ только Владельцу объекта (менеджеру) или Админу.
+    """Доступ к объекту только владельцу (менеджеру/исполнителю) или админу.
+
+    Основная защита — фильтрация queryset в crm/access.py; это второй рубеж.
     """
 
     def has_object_permission(self, request, view, obj):
-        # 1. Админу можно всё
-        if request.user.role == 'ADMIN':
+        if is_crm_admin(request.user):
             return True
-
-        # 2. Проверяем, есть ли у объекта атрибут 'manager' или 'assignee'
-        # (для сделок/клиентов это manager, для задач - assignee)
-        owner = getattr(obj, 'manager', getattr(obj, 'assignee', None))
-
-        # 3. Разрешаем, только если текущий юзер совпадает с владельцем
-        return obj == request.user or owner == request.user
+        owner_id = getattr(obj, 'manager_id', None) or getattr(obj, 'assignee_id', None)
+        return owner_id == request.user.id

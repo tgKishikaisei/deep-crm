@@ -26,7 +26,7 @@
         <div class="col-md-6 h-100 position-relative">
             <!-- 4. SPLINE 3D (Вставлена демо-сцена с роботом/абстракцией) -->
             <div class="spline-wrapper">
-               <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.28/build/spline-viewer.js"></script>
+               <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.28/build/spline-viewer.js" integrity="sha384-GIdv409KXbn/VVwdNVc02OJyopUlMvkCc4EMODseCLCHjCrb9+a3h6vkQE3lZBkM" crossorigin="anonymous"></script>
                 <spline-viewer
                         url="https://prod.spline.design/sVurPPayPqmI8O1U/scene.splinecode"
                         background="transparent">
@@ -244,7 +244,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // --- 1. HACKER TEXT SCRAMBLE (Исправленный) ---
     class TextScramble {
         constructor(el) {
@@ -343,7 +343,7 @@
     }, 3000); // Таймер на 3 секунды
 </script>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Магия слежения за мышкой
     document.getElementById("magic-container").onmousemove = e => {
         for(const card of document.getElementsByClassName("magic-card")) {

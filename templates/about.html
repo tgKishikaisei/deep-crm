@@ -193,7 +193,7 @@
         }
     </style>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         // JS для переключения видео при наведении
         document.querySelectorAll('.hover-item').forEach(item => {
             item.addEventListener('mouseenter', function() {

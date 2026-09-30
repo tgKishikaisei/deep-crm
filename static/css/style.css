@@ -128,7 +128,7 @@ a:hover {
 .btn-menu {
     position: fixed;
     top: 20px;
-    left: 20px; /* <--- ИЗМЕНИЛИ: Было right: 30px, Стало left: 20px */
+    left: 20px;
     z-index: 1000;
     background: rgba(255,255,255,0.1);
     backdrop-filter: blur(5px);
@@ -710,4 +710,14 @@ main {
     box-shadow: 0 0 10px #00d2ff;
     z-index: 10000; /* Поверх всего */
     transition: width 0.1s;
+}
+/* Уважение к системной настройке «уменьшить движение» (WCAG 2.3.3):
+   анимации и переходы практически мгновенные, плавная прокрутка отключена. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

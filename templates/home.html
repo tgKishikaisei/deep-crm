@@ -225,9 +225,9 @@
 
 {% block extra_js %}
 <!-- Подключаем библиотеку для печатающегося текста -->
-<script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+<script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js" integrity="sha384-cMrTlShXEGSdSFA359p+3aVUxK/R+0TAfbRZMcTlAn8yqzxEDj05QsS65nTFMMj4" crossorigin="anonymous"></script>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // 1. Анимация текста в заголовке
     var typed = new Typed('#typed-text', {
         strings: ['Управление Продажами', 'Аналитика', 'Рост Бизнеса', 'Ваш Успех'],

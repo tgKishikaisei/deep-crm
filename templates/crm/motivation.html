@@ -158,7 +158,7 @@
     }
 </style>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // --- 1. ПАРАЛЛАКС ЭФФЕКТ (3D Движение текста) ---
     const content = document.querySelector('.content');
 

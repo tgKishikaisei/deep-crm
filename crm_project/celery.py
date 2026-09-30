@@ -3,7 +3,7 @@ import os
 from celery import Celery
 
 # Указываем Django, где искать настройки
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crm_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crm_project.settings.prod')
 
 app = Celery('crm_project')
 

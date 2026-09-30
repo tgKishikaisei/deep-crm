@@ -12,6 +12,8 @@ db.sqlite3-journal
 .env
 .env.local
 .env.*
+# Шаблон переменных окружения должен попадать в репозиторий.
+!.env.example
 secrets.json
 
 # --- Виртуальное окружение ---
@@ -44,3 +46,30 @@ celerybeat.pid
 # --- Операционные системы ---
 .DS_Store
 Thumbs.db
+
+# Секреты и локальные данные
+*.session
+*.session-journal
+config.ini
+client_secret*.json
+service_account*.json
+authorized_user.json
+*.pem
+*.key
+*.db
+*.sqlite3
+aiogram_log.txt
+# Python
+venvv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# Node
+node_modules/
+dist/
+# IDE и служебные файлы
+AUDIT.md
+CLAUDE.md
+.agents/
+.claude/

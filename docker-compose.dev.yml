@@ -1,0 +1,18 @@
+# Разработка: runserver с автоперезагрузкой и dev-настройками.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+services:
+  web:
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    environment:
+      DJANGO_SETTINGS_MODULE: crm_project.settings.dev
+    read_only: false
+    volumes:
+      - .:/app
+  celery:
+    environment:
+      DJANGO_SETTINGS_MODULE: crm_project.settings.dev
+    volumes:
+      - .:/app
+  migrate:
+    environment:
+      DJANGO_SETTINGS_MODULE: crm_project.settings.dev

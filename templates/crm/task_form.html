@@ -56,7 +56,7 @@
                                 <i class="fa-solid fa-check me-2"></i> Сохранить
                             </button>
                             <!-- Кнопка назад (хитрая: возвращает на предыдущую страницу) -->
-                            <button type="button" onclick="history.back()" class="btn btn-outline-light">
+                            <button type="button" data-action="history-back" class="btn btn-outline-light">
                                 Отмена
                             </button>
                         </div>
@@ -68,4 +68,7 @@
         </div>
     </div>
 </div>
+<script nonce="{{ request.csp_nonce }}">
+    document.querySelector('[data-action="history-back"]')?.addEventListener('click', () => history.back());
+</script>
 {% endblock %}

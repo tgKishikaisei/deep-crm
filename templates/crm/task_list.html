@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои задачи{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 mt-4 ps-5">
+        <div>
+            <h1 class="fw-bold text-white mb-0" style="text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);">Задачи</h1>
+            <p class="text-white-50">Сначала самые срочные</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-glass align-middle">
+            <thead>
+                <tr>
+                    <th>Задача</th>
+                    <th>Сделка</th>
+                    <th>Срок</th>
+                    <th>Статус</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>
+                        <div class="fw-bold text-white">{{ task.title }}</div>
+                        <small class="text-white-50">{{ task.description|truncatechars:80 }}</small>
+                    </td>
+                    <td>
+                        <a href="{% url 'crm:deal_detail' task.deal_id %}" class="text-info text-decoration-none">{{ task.deal.title }}</a>
+                    </td>
+                    <td><span class="badge bg-dark border border-secondary text-white-50 fw-normal">{{ task.due_date|date:"d.m.Y H:i" }}</span></td>
+                    <td>
+                        {% if task.status == 'COMPLETED' %}
+                            <span class="badge bg-success">{{ task.get_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">{{ task.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'crm:task_update' task.pk %}" class="action-btn btn-edit" title="Изменить" aria-label="Изменить задачу">
+                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                        </a>
+                        <a href="{% url 'crm:task_delete' task.pk %}" class="action-btn btn-delete" title="Удалить" aria-label="Удалить задачу">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-white-50">Задач пока нет.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="Страницы задач">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
